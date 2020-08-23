@@ -1,0 +1,43 @@
+html, body {
+    height:100%;
+    background:#666;
+}
+
+*[role="form"] {
+    max-width: 530px;
+    padding: 2.5px;
+    margin: 0 auto;
+    border-radius: 0.3em;
+    background-color: #f2f2f2;
+    display: flex;
+    flex-direction: column;
+}
+
+*[role="form"] h3 { 
+    font-family: 'Open Sans' , sans-serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: #000000;
+    margin-top: 5%;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+}
+
+
+#entry{
+    height:calc(100% - 58px);
+    background:#fff;
+}
+
+#search{
+    height:calc(100% - 58px);
+}
+
+#create{
+    height:calc(100% - 58px);
+}
+
+#recordList{
+    list-style: none;
+}

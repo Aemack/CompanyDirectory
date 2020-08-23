@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Company Directory</title>
+        <meta property="og:image" content="img/globe.jpeg">
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta property="og:image" content="img/cd.png" />
+        <link rel="shortcut icon" href="img/cd.png" type="image/x-icon">
+        
+        <!--jQuery-->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        
+        <!--Bootstrap-->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+      
+        
+        <!--FontAwesome-->
+        <link src="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src="https://kit.fontawesome.com/ef02b9276b.js" crossorigin="anonymous"></script>
+        
+        <!--My Styles-->
+        <link href="css/main.css" rel="stylesheet">
+        <script src="js/app.js"></script>
+      </head>
+      <body>
+        
+        <!--Navbar/Header-->
+        <nav class="navbar navbar-expand navbar-dark bg-dark">
+          <a class="navbar-brand" href="#">Company Directory</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample02" aria-controls="navbarsExample02" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+    
+          <div class="collapse navbar-collapse" id="navbarsExample02">
+            <ul class="nav nav-tabs mr-auto">
+              <li class="nav-item active">
+                <a id="searchTab" class="nav-link active" onclick="searchClicked()" href="#">Search<span id="searchTabCheck" class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                <a id="createTab" class="nav-link text-light" onclick="createClicked(), clearCreate()" href="#">Create<span id="createTabCheck" class="sr-only"></span></a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+
+
+
+        <div id="collapseAlert" class="collapse fixed-top text-center w-100">
+          <div><h6 id="alertText" class="rounded-bottom border-bottom border-dark p-1"></h6><a href="#" class="stretched-link" onclick="hideAlert()"></a></div>
+        </div>
+
+
+
+        
+          <!---Search Results-->
+
+        <div id="searchResults" style="display: none">
+
+          <ul id="resultList" class="list-group">
+
+          </ul>
+          
+        </div>
+
+
+
+
+
+
+
+
+<!--Search-->
+        <div id="search" class="container">
+          <form onsubmit="return false" id="searchForm"  role="form">
+              <h3>Search</h3>
+              <div class="form-group row">
+                  <label for="firstName" class="col-3 my-auto text-center">First Name</label>
+                  <div class="col-9 my-auto">
+                      <input type="text" id="firstNameSearch" placeholder="First Name" class="form-control" autofocus>
+                  </div>
+              </div>
+              <div class="form-group row">
+                  <label for="lastNameSearch" class="col-3 my-auto text-center">Last Name</label>
+                  <div class="col-9">
+                      <input type="text" id="lastNameSearch" placeholder="Last Name" class="form-control" autofocus>
+                  </div>
+              </div>
+              <div class="form-group row">
+                  <label for="emailSearch" class="col-3 my-auto text-center">Email </label>
+                  <div class="col-9">
+                      <input type="email" id="emailSearch" placeholder="Email" class="form-control" name= "emailSearch">
+                  </div>
+              </div>
+              <div class="form-group row">
+                <label for="jobTitleSearch" class="col-3 my-auto text-center">Job Title</label>
+            <div class="col-9">
+                <input type="text" id="jobTitleSearch" placeholder="Job Title" class="form-control">
+            </div>
+        </div>
+              <div class="form-group row">
+                  <label for="idSearch" class="col-3 my-auto text-center">ID Number</label>
+                  <div class="col-9">
+                      <input type="number" id="idSearch" placeholder="ID Number" class="form-control">
+                  </div>
+              </div>
+              <div class="form-group row">
+                  <label for="departmentSearch" class="col-3 my-auto text-center">Department</label>
+                  <div class="col-9">
+                      <select id="departmentSearch" class="form-control"><option value="" selected>Please select</option></select>
+                  </div>
+              </div>
+              <div class="form-group row">
+                  <label for="locationSearch" class="col-3 my-auto text-center">Location</label>
+                  <div class="col-9">
+                    <select id="locationSearch" class="form-control"><option value="" selected>Please select</option></select>
+                  </div>
+              </div>
+
+              <button type="submit" onclick="submitSearch()" class="btn btn-primary btn-block">Search</button>
+          </form> <!-- /form -->
+      </div> <!-- ./container -->
+
+
+
+
+      <!--Create-->
+      <div id="create" class="container">
+        <form onsubmit="return false" id="createForm" role="form">
+            <h3>Create</h3>
+            <div class="form-group row">
+                <label for="firstName" class="col-3 my-auto text-center">First Name</label>
+                <div class="col-9 my-auto">
+                    <input required type="text" id="firstNameCreate" placeholder="First Name" class="form-control" autofocus>
+
+                  </div>
+            </div>
+            <div class="form-group row">
+                <label for="lastNameCreate" class="col-3 my-auto text-center">Last Name</label>
+                <div class="col-9">
+                    <input  required type="text" id="lastNameCreate" placeholder="Last Name" class="form-control" autofocus>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="emailCreate" class="col-3 my-auto text-center">Email </label>
+                <div class="col-9">
+                    <input  required type="email" id="emailCreate" placeholder="Email" class="form-control" name= "emailSearch">
+                </div>
+            </div>
+            <div class="form-group row">
+              <label for="jobTitleCreate" class="col-3 my-auto text-center">Job Title</label>
+          <div class="col-9">
+              <input type="text" id="jobTitleCreate" placeholder="Job Title" class="form-control">
+          </div>
+      </div>
+            <div class="form-group row">
+                <label for="idCreate" class="col-3 my-auto text-center">ID Number</label>
+                <div class="col-9">
+                    <input type="number" id="idCreate" placeholder="ID Number" class="form-control">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="departmentCreate" class="col-3 my-auto text-center">Department</label>
+                <div class="col-9">
+                    <select  required id="departmentCreate" class="form-control"><option value="" selected>Please select</option></select>
+                </div>
+            </div>
+
+            <button type="submit" onclick="submitCreate()" class="btn btn-primary btn-block">Create</button>
+            
+          </form> <!-- /form -->
+      </div> <!-- ./container -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        <!---Entry View-->
+        <div id="entry" style="display: none">
+          <div id="recordOutput" class="h-100 justify-content-between d-flex flex-column">
+          </div>
+        </div>
+
+      </body>
+
+</html>
