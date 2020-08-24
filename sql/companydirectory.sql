@@ -13,8 +13,8 @@
 
 
 -- Dumping database structure for id14686068_companydirectory
-CREATE DATABASE IF NOT EXISTS `id14686068_companydirectory` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `id14686068_companydirectory`;
+CREATE DATABASE IF NOT EXISTS `epiz_26577888_companydirectory` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `epiz_26577888_companydirectory`;
 
 -- Dumping structure for table id14686068_companydirectory.department
 CREATE TABLE IF NOT EXISTS `department` (

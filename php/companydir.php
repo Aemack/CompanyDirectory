@@ -1,6 +1,6 @@
 <?php
 
-$dbName = "companydirectory";
+$dbName = "id14686068_companydirectory";
 $dbUser = "root";
 $dbHost = "localhost";
 $dbPass = "";
@@ -93,7 +93,9 @@ function getPersonByID($id){
     $record["locationID"] = getLocationIDFromDepartment($row["departmentID"]); 
     $record["locationName"] = getLocationFromDepartment($row["departmentID"]);
     $record["departmentName"] = getDepartmentName($row["departmentID"]);
-
+    $depHead =getDepHeadName($record["departmentID"]);
+    $record["departmentHead"] = $depHead[0];
+    $record["departmentHeadID"] = $depHead[1];
     return $record;
 
 }
@@ -223,6 +225,7 @@ function search($obj){
     $email = $obj["email"];
     $department = $obj["department"];
     $location = $obj["location"];
+    $jobTitle = $obj["jobTitle"];
     
 
     
@@ -232,7 +235,7 @@ function search($obj){
 
 
 
-    $sql = "SELECT * FROM personnel WHERE id > 0";
+    $sql = "SELECT * FROM personnel WHERE id >= 0";
 
     
     if($firstName && !empty($firstName)){
@@ -253,6 +256,11 @@ function search($obj){
     if($id && !empty($id)){
         $sql .= " AND id = '$id'";
     }
+
+    
+    if($jobTitle && !empty($jobTitle)){
+        $sql .= " AND jobTitle = '$jobTitle'";
+    } 
 
     
     if($department && !empty($department)){
@@ -290,6 +298,9 @@ function search($obj){
           $result[$i]["jobTitle"] = $row["jobTitle"];
           $result[$i]["locationName"] = getLocationFromDepartment($row["departmentID"]);
           $result[$i]["departmentName"] = getDepartmentName($row["departmentID"]);
+          $depHead = getDepHeadName($row["departmentID"]);
+          $result[$i]["departmentHead"] = $depHead[0];
+          $result[$i]["departmentHeadID"] = $depHead[1];
           $i++;
         }
         return $result;
@@ -300,6 +311,19 @@ function search($obj){
       
 
 
+}
+
+function getDepHeadName($depID){
+    global $dbName, $dbUser, $dbHost, $dbPass;
+    $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+
+    $sql = "SELECT * FROM personnel WHERE jobTitle='Department Head' AND departmentID='$depID'"; 
+    $res = mysqli_query($conn, $sql);
+    $row = $res->fetch_assoc();
+    $headName = $row["firstName"]." ".$row["lastName"];
+
+    $headID = $row["id"];
+    return [$headName, $headID];
 }
 
 function updateAll($person){
@@ -318,14 +342,16 @@ function updateAll($person){
 
     $i=0;
     foreach ($person as $key => $value) {
-        $sql.="'".$key."'='".$value."'";
+        $sql.=$key."='".$value."'";
+        $i++;
         if ($i<count($person)){
             $sql.=',';
         }
+        
      }
 
-     $sql.="WHERE id=".$id;
 
+     $sql.=" WHERE id=".$id;
 
      $res = mysqli_query($conn, $sql);
 
@@ -362,7 +388,7 @@ function create($obj){
     $res = mysqli_query($conn, $sql);
 
     if($res){
-        $sql="SELECT * FROM personnel WHERE id='$id' AND firstName='$firstName' AND lastName='$lastName' AND email='$email'";
+        $sql="SELECT * FROM personnel WHERE id='$id' AND firstName='$firstName' AND lastName='$lastName' AND email='$email' AND jobTitle='$jobTitle'";
         $newres = mysqli_query($conn, $sql);
         $row = $newres->fetch_assoc();
         $result["id"] = $row["id"];
@@ -383,7 +409,96 @@ function create($obj){
 
 }
 
+function fillJobs(){
+    $jobs = ["Team Member","Team Member","Team Member","Team Member","Team Leader","Team Leader","Manager"];
+    global $dbName, $dbUser, $dbHost, $dbPass;
+    $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+    $sql = "SELECT * FROM personnel";    
+    $res = mysqli_query($conn, $sql);
+    $i=0;
+    while($row = $res->fetch_assoc()) {
+        $usedIDs[$i] = $row["id"];
+        $i++;
+    }
+
+    forEach($usedIDs as $ID){
+        $job=$jobs[rand(0,6)];
+        $sql = "UPDATE personnel SET jobTitle='$job' WHERE id=$ID";
+        mysqli_query($conn, $sql);
+    }
+
+
+    for($i=1;$i<13;$i++){
+        $id = $usedIDs[$i];
+        $sql = "UPDATE  personnel SET jobTitle='Department Head', departmentID=$i WHERE id=$id";
+        $res = mysqli_query($conn, $sql);
+    }
+
+    
+    return $res;
+
+}
+
+function checkID($id){
+    global $dbName, $dbUser, $dbHost, $dbPass;
+    $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+    $sql = "SELECT * FROM personnel WHERE id='$id'";    
+    
+    $res = mysqli_query($conn, $sql);
+
+    $row = $res->fetch_assoc();
+
+    if(!$row){
+        return "false";
+    }
+
+    if(count($row) > 0){
+        return "true";
+    } else {
+        return "false";
+    }
+}
+
+function getAvailableIDs(){
+    global $dbName, $dbUser, $dbHost, $dbPass;
+    $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+    $sql = "SELECT * FROM personnel";
+    $res = mysqli_query($conn, $sql);
+    $availableIDs = [];
+    $i=0;
+    while($row = $res->fetch_assoc()) {
+        $usedIDs[$i] = $row["id"];
+        $i++;
+    }
+    $i=0;
+    while (count($availableIDs) < 10){
+        $i++;
+        if (in_array($i,$usedIDs)){
+            continue;
+        } else {
+            array_push($availableIDs, $i);
+        }
+    }
+    return $availableIDs;
+}
+
 switch($_POST['functionname']) {
+    case 'getDepHeadName':
+        $result=getDepHeadName(($_POST['arguments'][0]));
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        break;
+    case 'fillJobs':
+        $result=fillJobs();
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        break;
+    case 'checkID':
+        $result=checkID(($_POST['arguments'][0]));
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        break;
+    case 'getAvailableIDs':
+        $result=getAvailableIDs();
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        break;
     case 'updateAll':
         $result=updateAll(($_POST['arguments'][0]));
         echo json_encode($result, JSON_UNESCAPED_UNICODE);

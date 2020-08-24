@@ -42,7 +42,7 @@
               </li>
               <li class="nav-item">
                 <a id="createTab" class="nav-link text-light" onclick="createClicked(), clearCreate()" href="#">Create<span id="createTabCheck" class="sr-only"></span></a>
-              </li>
+              </li>              
             </ul>
           </div>
         </nav>
@@ -51,15 +51,15 @@
 
 
         <div id="collapseAlert" class="collapse fixed-top text-center w-100">
-          <div><h6 id="alertText" class="rounded-bottom border-bottom border-dark p-1"></h6><a href="#" class="stretched-link" onclick="hideAlert()"></a></div>
+          <div><h6 id="alertText" class="rounded-bottom border-bottom border-dark p-1"></h6><a href="#" class="stretched-link" onmouseover="hideAlert()"></a></div>
         </div>
 
-
+<div id="main">
 
         
           <!---Search Results-->
 
-        <div id="searchResults" style="display: none">
+        <div id="searchResults" style="display: none;">
 
           <ul id="resultList" class="list-group">
 
@@ -76,7 +76,8 @@
 
 <!--Search-->
         <div id="search" class="container">
-          <form onsubmit="return false" id="searchForm"  role="form">
+          <div>
+          <form class="bm-0" onsubmit="return false" id="searchForm"  role="form">
               <h3>Search</h3>
               <div class="form-group row">
                   <label for="firstName" class="col-3 my-auto text-center">First Name</label>
@@ -105,7 +106,7 @@
               <div class="form-group row">
                   <label for="idSearch" class="col-3 my-auto text-center">ID Number</label>
                   <div class="col-9">
-                      <input type="number" id="idSearch" placeholder="ID Number" class="form-control">
+                      <input type="number" oninput="checkID(this)" id="idSearch" placeholder="ID Number" class="form-control">
                   </div>
               </div>
               <div class="form-group row">
@@ -121,79 +122,138 @@
                   </div>
               </div>
 
-              <button type="submit" onclick="submitSearch()" class="btn btn-primary btn-block">Search</button>
+              <button type="submit" onclick="submitSearch()" class="btn btn-primary btn-block m-auto p-3">Search</button>
           </form> <!-- /form -->
+        </div>
       </div> <!-- ./container -->
 
 
 
 
-      <!--Create-->
+<!--Create-->
       <div id="create" class="container">
-        <form onsubmit="return false" id="createForm" role="form">
+        <div>
+        <form class="bm-0" onsubmit="return false" id="createForm" role="form">
             <h3>Create</h3>
             <div class="form-group row">
                 <label for="firstName" class="col-3 my-auto text-center">First Name</label>
                 <div class="col-9 my-auto">
-                    <input required type="text" id="firstNameCreate" placeholder="First Name" class="form-control" autofocus>
+                    <input required type="text" onblur="checkEmpty(this)" oninput="checkEmpty(this)" id="firstNameCreate" placeholder="First Name" class="form-control" autofocus>
 
                   </div>
             </div>
             <div class="form-group row">
                 <label for="lastNameCreate" class="col-3 my-auto text-center">Last Name</label>
                 <div class="col-9">
-                    <input  required type="text" id="lastNameCreate" placeholder="Last Name" class="form-control" autofocus>
+                    <input onblur="checkEmpty(this)" oninput="checkEmpty(this)" required type="text" id="lastNameCreate" placeholder="Last Name" class="form-control" autofocus>
                 </div>
             </div>
             <div class="form-group row">
                 <label for="emailCreate" class="col-3 my-auto text-center">Email </label>
                 <div class="col-9">
-                    <input  required type="email" id="emailCreate" placeholder="Email" class="form-control" name= "emailSearch">
+                    <input onblur="checkEmail(this)" oninput="checkEmail(this)" required type="email" id="emailCreate" placeholder="Email" class="form-control" name= "emailSearch">
                 </div>
             </div>
             <div class="form-group row">
               <label for="jobTitleCreate" class="col-3 my-auto text-center">Job Title</label>
           <div class="col-9">
-              <input type="text" id="jobTitleCreate" placeholder="Job Title" class="form-control">
+              <input type="text" onblur="checkEmpty(this)" oninput="checkEmpty(this)" id="jobTitleCreate" placeholder="Job Title" class="form-control">
           </div>
       </div>
             <div class="form-group row">
                 <label for="idCreate" class="col-3 my-auto text-center">ID Number</label>
                 <div class="col-9">
-                    <input type="number" id="idCreate" placeholder="ID Number" class="form-control">
+                    <div class="input-group"><input type="number" onblur="checkID(this)" oninput="checkID(this)" id="idCreate" placeholder="ID Number" class="form-control">
+                      <div class="input-group-append">
+                      <button onclick="fillID('Create'), checkID()" type="button" class="btn btn-outline-secondary">Generate</button>
+                      </div>
+                      </div>
                 </div>
             </div>
             <div class="form-group row">
                 <label for="departmentCreate" class="col-3 my-auto text-center">Department</label>
                 <div class="col-9">
-                    <select  required id="departmentCreate" class="form-control"><option value="" selected>Please select</option></select>
+                    <select onblur="checkEmpty(this)" oninput="checkEmpty(this)" required id="departmentCreate" class="form-control"><option value="" selected>Please select</option></select>
                 </div>
             </div>
 
-            <button type="submit" onclick="submitCreate()" class="btn btn-primary btn-block">Create</button>
+            <button type="submit" onclick="submitCreate()" class="btn btn-primary btn-block m-auto p-3">Create</button>
             
           </form> <!-- /form -->
+        </div>
       </div> <!-- ./container -->
 
 
-
-
-
-
-
-
-
-
-
-
-
         
-        <!---Entry View-->
-        <div id="entry" style="display: none">
-          <div id="recordOutput" class="h-100 justify-content-between d-flex flex-column">
+<!---Entry View-->        
+<div id="entry" class="container">
+          <form onsubmit="return false" id="searchForm"  role="form">
+            <h3>Entry</h3>
+            <div class="form-group row">
+                <label for="firstNameInput" class="col-3 my-auto text-center">First Name</label>
+                <div class="col-9 my-auto">
+                    <div id="firstNameShow" class="d-flex"><h5 id="firstNameEntry"></h5><a onclick="editEntry('firstName')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a></div>
+                    <input type="text" id="firstNameInput" placeholder="First Name" class="form-control d-none" autofocus>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="lastNameInput" class="col-3 my-auto text-center">Last Name</label>
+                <div class="col-9">
+                  <div class="d-flex" id="lastNameShow"><h5 id="lastNameEntry"></h5><a onclick="editEntry('lastName')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a></div>
+                    <input type="text"  id="lastNameInput" placeholder="Last Name" class="form-control d-none" autofocus>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="emailInput" class="col-3 my-auto text-center">Email </label>
+                <div class="col-9">
+                  <div class="d-flex" id="emailShow"><h5 id="emailEntry"></h5><a onclick="editEntry('email')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a></div>
+                    <input type="email" id="emailInput" placeholder="Email" class="form-control d-none" name= "emailSearch">
+                </div>
+            </div>
+            <div class="form-group row">
+              <label for="jobTitleInput" class="col-3 my-auto text-center">Job Title</label>
+          <div class="col-9">
+            <div class="d-flex" id="jobTitleShow"><h5 id="jobTitleEntry"></h5><a onclick="editEntry('jobTitle')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a></div>
+              <input type="text" id="jobTitleInput" placeholder="Job Title" class="form-control d-none">
+          </div>
+      </div>
+            <div class="form-group row">
+                <label for="departmentInput" class="col-3 my-auto text-center">Department</label>
+                <div class="col-9">
+                  <div class="d-flex" id="departmentShow"><h5 id="departmentEntry"></h5><a onclick="editEntry('department')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a></div>
+                    <select id="departmentInput" class="form-control d-none"><option value="" selected>Please select</option></select>
+                </div>
+            </div>
+
+            <button id="deleteButton" data-toggle="modal" data-target="#deleteModal" type="button"  class="btn btn-danger btn-block">DELETE</button>
+            <button id="saveButton"  type="button"  class="btn btn-success btn-block">SAVE</button>
+        </form> <!-- /form -->
+    </div> <!-- ./container -->
+
+
+<!--Modal-->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalLabel">Are you sure</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <button  type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <h6>You want to remove <span id="deleteName"></span> from the database?</h6>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" id="deleteSecondButton" data-dismiss="modal" class="btn btn-danger">DELETE</button>
           </div>
         </div>
+      </div>
+    </div>
 
+  </div>
       </body>
 
 </html>

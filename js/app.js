@@ -1,10 +1,25 @@
 window.onload = function(){
-    console.log("loaded")
+    //fillJobs()
+    $("#entry").hide()
+    $("#create").hide() 
     fillLocations()
     fillDepartments()
     $(document).click(function (event) {
         hideAlert();
     });
+}
+
+function fillJobs(){
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: 'fillJobs'},
+        success: (obj)=>{console.log(obj)},
+        error: (er)=>{console.log(er.responseText)}
+        
+    })
+
 }
 
 function clearSearch(){
@@ -13,6 +28,20 @@ function clearSearch(){
 
 function clearCreate(){
     $('#createForm').trigger("reset");
+    $('#firstNameCreate').removeClass("border-danger")
+    $('#firstNameCreate').removeClass("border-success")
+
+    $('#lastNameCreate').removeClass("border-danger")
+    $('#lastNameCreate').removeClass("border-success")
+    
+    $('#emailCreate').removeClass("border-danger")
+    $('#emailCreate').removeClass("border-success")
+
+    $('#jobTitleCreate').removeClass("border-danger")
+    $('#jobTitleCreate').removeClass("border-success")
+    
+    $('#idCreate').removeClass("border-danger")
+    $('#idCreate').removeClass("border-success")
 }
 
 function createClicked(){
@@ -27,6 +56,10 @@ function createClicked(){
     $("#createTab").addClass("active");
     $("#createTabCheck").text("(current)")
     $("#searchTabCheck").text("")
+
+    $(".form-control").removeClass("border-danger")
+    $(".form-control").removeClass("border-success")
+    $('#createForm').trigger("reset");
 }
 
 
@@ -42,6 +75,7 @@ function searchClicked(){
     $("#searchTab").removeClass("text-light");
     $("#searchTabCheck").text("(current)")
     $("#createTabCheck").text("")
+    $('#searchForm').trigger("reset");
 
 
 }
@@ -67,16 +101,23 @@ function getLocationFromDepartment(depID){
     })
 }
 
+
+
 function submitSearch(){
     obj = {};
     obj.firstName = $("#firstNameSearch").val()
     obj.lastName = $("#lastNameSearch").val()
     obj.email = $("#emailSearch").val()
     obj.id = $("#idSearch").val()
+    console.log(Number(obj.id))
+    if (Number(obj.id) == NaN){
+        $("idSearch").addClass("border-danger")
+        return false;
+    }
+    console.log(obj.id)
     obj.location = $("#locationSearch").val()
     obj.department = $("#departmentSearch").val()
     obj.jobTitle = $("#jobTitleSearch").val()
-    console.log(obj)
     jQuery.ajax({
         type: "POST",
         url: 'php/companydir.php',
@@ -94,7 +135,6 @@ function submitSearch(){
 }
 
 function entryClicked(id){
-    console.log(id)
     jQuery.ajax({
         type: "POST",
         url: 'php/companydir.php',
@@ -107,146 +147,53 @@ function entryClicked(id){
 }
 
 function displayEntry(person){
-    console.log(person)
     $("#searchResults").hide()
     $("#entry").show()
     $("#create").hide()
     $("#search").hide()
     $("#recordOutput").empty();
-    $("#recordOutput").append( `
+    $("#firstNameEntry").text(person.firstName)
+    $("#firstNameShow").removeClass("d-none")
+    $("#firstNameShow").addClass("d-flex")
+    $("#firstNameInput").val(person.firstName)
+    $("#firstNameInput").addClass("d-none")
 
-        <!--Name-->
-        <div class="row w-100 h-100 mx-auto">
-            <div class="w-100 h-100 d-flex flex-column">
-                <h5 class=" bg-secondary p-0 m-0 text-light">Name</h5>
-                <div id="nameRecord" class="d-flex my-auto col justify-content-around">
-                    <div></div>
-                    <h5 class="my-auto" id="fullName">${person.firstName} ${person.lastName}</h5>
-                    <a onclick="editEntry('name')" class="text-primary my-auto" href="#">
-                        <h5><i class="fas fa-pencil-alt p-1"></i></h5>
-                    </a>
-                </div>
-                
-                <h6 class="mx-auto">ID:${person.id}</h6>
+    $("#lastNameEntry").text(person.lastName)
+    $("#lastNameShow").removeClass("d-none")
+    $("#lastNameShow").addClass("d-flex")
+    $("#lastNameInput").val(person.lastName)
+    $("#lastNameInput").addClass("d-none")
 
-                <div id="nameEdit" class="input-group d-none text-center my-auto">
-                <input type="text" id="firstNameEdit" value="${person.firstName}" class="form-control">
-                <input type="text" id="lastNameEdit" value="${person.lastName}" class="form-control">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" onclick="updateName(${person.id})" type="button">Update</button>
-                </div>
-              </div>
-              </div>
-        </div>
+    $("#emailEntry").text(person.email)
+    $("#emailShow").removeClass("d-none")
+    $("#emailShow").addClass("d-flex")
+    $("#emailInput").val(person.email)
+    $("#emailInput").addClass("d-none")
 
-
-
-
-        <!--Email-->
-        <div class="row w-100 h-100 mx-auto">
-            <div class="w-100 h-100">
-                <h5 class="rounded bg-secondary p-0 m-0 text-light">Email</h5>
-                <div id="emailRecord" class="d-flex my-auto col justify-content-around">
-
-                <div></div>
-                    <h5 class="my-auto text-center"  id="emailDisplay">${person.email}</h5>
-                    <a onclick="editEntry('email')" class="my-auto text-primary" href="#">
-                        <h5><i class="fas fa-pencil-alt p-1"></i></h5>
-                    </a>
-                </div>
-                <div id="emailEdit" class="input-group d-none my-auto">
-                <input type="text" id="emailInput" value="${person.email}" class="form-control">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" onclick="updateEmail('${person.id}')" type="button">Update</button>
-                </div>
-              </div>
-            </div>
-        </div>
-
-
-
-
-
-        <!--Job Title-->
-        <div class="row w-100 h-100 mx-auto">
-            <div class="w-100 h-100">
-                <h5 class="rounded bg-secondary p-0 m-0 text-light">Job Title</h5>
-                <div id="jobTitleRecord" class="d-flex col justify-content-around">
-
-                <div></div>
-                    <h5 id="jobTitleDisplay">${person.jobTitle}</h5>
-                    <a onclick="editEntry('jobTitle')" class="text-primary" href="#">
-                        <h5><i class="fas fa-pencil-alt p-1"></i></h5>
-                    </a>
-                </div>
-                <div id="jobTitleEdit" class="input-group d-none">
-                <input type="text" id="jobTitleInput" value="${person.jobTitle}" class="form-control">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" onclick="updatejobTitle('${person.id}')" type="button">Update</button>
-                </div>
-              </div>
-            </div>
-        </div>
-
-
-
-
-
-        <!--Department-->
-        <div class="row w-100 h-100 mx-auto">
-            <div class="w-100 h-100">
-                <h5 class="rounded bg-secondary p-0 m-0 text-light">Department</h5>
-                <div id="departmentRecord" class="d-flex col justify-content-around">
-
-                <div></div>
-                    <div>
-                        <h5 class="text-center" id="departmentDisplay">${person.departmentName}</h5>
-                        <p class="text-center" id="locationDisplay">\(${person.locationName}\)</p>
-                    </div>
-                    <a onclick="editEntry('department')" class="text-primary" href="#">
-                        <h5><i class="fas fa-pencil-alt p-1"></i></h5>
-                    </a>
-                </div>
-                <div id="departmentEdit" class="input-group d-none">
-                    <select type="text" id="departmentInput" value="${person.departmentName}" class="form-control"></select>
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" onclick="updateDepartment('${person.id}')" type="button">Update</button>
-                </div>
-              </div>
-            </div>
-        </div>
-
-
-        <div class="d-flex justify-content-around">
-        <button  data-toggle="modal" data-target="#deleteModal" class="btn btn-danger w-100">DELETE</button>
-        <button onclick="saveEntry(${person.id})" type="button" data-toggle="collapse" data-target="#collapseAlert" aria-expanded="false" aria-controls="collapseAlert" class="btn btn-primary w-100">SAVE</button>
-        </div>
-
-
-
-        <!--Delete Modal-->
-        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel" data-toggle="modal" data-target="#deletedModal">Delete ${person.firstName} ${person.lastName}?</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-footer">
-                <button type="button" onclick="deleteEntry(${person.id})" class="btn btn-danger" data-dismiss="modal" type="button">DELETE</button>
-                <button type="button"  class="btn btn-secondary" data-dismiss="modal">CANCEL</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-
-    `)
-    $("#departmentInput").html($("#departmentSearch").html())
+    $("#departmentEntry").text(person.departmentName)
+    $("#departmentShow").removeClass("d-none")
+    $("#departmentShow").addClass("d-flex")
     $("#departmentInput").val(person.departmentID)
+    $("#departmentInput").addClass("d-none")
+
+    
+    $("#jobTitleEntry").text(person.jobTitle)
+    $("#jobTitleShow").removeClass("d-none")
+    $("#jobTitleShow").addClass("d-flex")
+    $("#jobTitleInput").val(person.jobTitle)
+    $("#jobTitleInput").addClass("d-none")
+    
+    $("#departmentShow").removeClass("d-none")
+    $("#departmentShow").addClass("d-flex")
+    $("#departmentInput").val(person.departmentID)
+    $("#departmentInput").addClass("d-none")
+
+    $("#deleteName").text(person.firstName+" "+person.lastName)
+    $("#deleteSecondButton").removeAttr("onclick");
+    $("#saveButton").removeAttr("onclick");
+    $("#deleteSecondButton").attr("onclick", `deleteEntry(${person.id})`)
+    $("#saveButton").attr("onclick", `saveEntry(${person.id})`)
+ 
 }
 
 function deleteEntry(id){
@@ -256,8 +203,10 @@ function deleteEntry(id){
         dataType: 'json',
         data: {functionname: 'deleteEntry', arguments: [id]},
         success: (obj)=>{
-            console.log(obj)
             searchClicked()
+            showAlert()
+            $("#alertText").removeClass("bg-warning")
+            $("#alertText").removeClass("bg-success")
             $("#alertText").text("Entry Deleted")
             $("#alertText").addClass("bg-danger")
 
@@ -269,13 +218,13 @@ function deleteEntry(id){
 function saveEntry(id){
     person = {}
     person.id = id
-    person.firstName = $("#firstNameEdit").val()
-    person.lastName = $("#lastNameEdit").val()
+    person.firstName = $("#firstNameInput").val()
+    person.lastName = $("#lastNameInput").val()
     person.email = $("#emailInput").val()
     person.jobTitle = $("#jobTitleInput").val()
-    person.departmentID = $("#departmentInput").val()
+    person.departmentID = $("#departmentInput option:selected").val()
+    
 
-    console.log(person)
 
     updatePerson(person)
 
@@ -289,7 +238,6 @@ function updatePerson(person){
         dataType: 'json',
         data: {functionname: 'updateAll', arguments: [person]},
         success: (obj)=>{
-            console.log(obj)
             showAlert()
             $("#alertText").removeClass("bg-warning")
             $("#alertText").removeClass("bg-danger")
@@ -303,9 +251,9 @@ function updatePerson(person){
 
 function editEntry(elem){
     console.log(elem)
-    $(`#${elem}Edit`).removeClass("d-none")
-    $(`#${elem}Record`).hide()
-    $(`#${elem}Record`).removeClass("d-flex")
+    $(`#${elem}Input`).removeClass("d-none")
+    $(`#${elem}Show`).removeClass("d-flex")
+    $(`#${elem}Show`).addClass("d-none")
 }
 
 function updateName(id){
@@ -317,7 +265,6 @@ function updateName(id){
         dataType: 'json',
         data: {functionname: 'updateName', arguments: [firstName,lastName,id]},
         success: (obj)=>{
-            console.log(obj)
             $("#fullName").text(`${obj[0]} ${obj[1]}`)                
             $(`#nameEdit`).addClass("d-none")
             $(`#nameRecord`).show()
@@ -336,7 +283,6 @@ function updateID(id){
         dataType: 'json',
         data: {functionname: 'updateDetails', arguments: [elem,data,id]},
         success: (obj)=>{
-            console.log(obj)
             $(`#${elem}Display`).text(`${obj[0]}`)                
             $(`#${elem}Edit`).addClass("d-none")
             $(`#${elem}Record`).show()
@@ -362,7 +308,6 @@ function updateEmail(id){
         dataType: 'json',
         data: {functionname: 'updateDetails', arguments: [elem,data,id]},
         success: (obj)=>{
-            console.log(obj)
             $(`#${elem}Display`).text(`${obj[0]}`)                
             $(`#${elem}Edit`).addClass("d-none")
             $(`#${elem}Record`).show()
@@ -382,7 +327,6 @@ function updatejobTitle(id){
         dataType: 'json',
         data: {functionname: 'updateDetails', arguments: [elem,data,id]},
         success: (obj)=>{
-            console.log(obj)
             $(`#${elem}Display`).text(`${obj[0]}`)                
             $(`#${elem}Edit`).addClass("d-none")
             $(`#${elem}Record`).show()
@@ -413,7 +357,6 @@ function updateDepartment(id){
 }
 
 function updateLocation(departmentID){
-    console.log(departmentID)
     jQuery.ajax({
         type: "POST",
         url: 'php/companydir.php',
@@ -429,7 +372,6 @@ function updateLocation(departmentID){
 
 function showResults(res){
     clearSearch()
-    console.log(res)
     
 
     $("#search").hide()
@@ -437,6 +379,7 @@ function showResults(res){
 
     i=0;
     res.forEach(function(record){
+        console.log(record)
         if (i%2==0){
             recordHTML = `<li class="list-group-item bg-light h-10">`
         } else {
@@ -458,7 +401,7 @@ function showResults(res){
                 ${record.locationName}
             </div>
             <div class="col">
-             ${record.departmentName}
+             ${record.departmentName} (<i>${record.departmentHead}</i>)
             </div>
         </div>
         <a href="#" onclick="entryClicked(${record.id})" class="stretched-link"></a>
@@ -508,11 +451,47 @@ function fillDepartments(){
                 option2.text = department.name;
                 $('#departmentCreate').append(option2)
 
+                option3 = document.createElement("option")
+                option3.value = department.id;
+                option3.text = department.name;
+                $('#departmentInput').append(option3)
+
+                
+
             })
         },
         error: (er)=>{console.log(er)}
         
     })
+}
+
+
+
+function checkEmail(elem){
+    emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+    elem.classList.remove("bg-success")    
+    elem.classList.remove("bg-danger")
+    console.log(emailRegex.test(elem.value))
+    if (!elem.value || !emailRegex.test(elem.value)){
+        console.log("empty")
+        elem.classList.remove("border-success")
+        elem.classList.add("border-danger")
+    } else {
+        console.log("not empty")
+        elem.classList.remove("border-danger")
+        elem.classList.add("border-success")
+    }
+    
+}
+
+function checkEmpty(elem){
+    elem.classList.remove("border-success")    
+    elem.classList.remove("border-danger")
+    if (!elem.value){
+        elem.classList.add("border-danger")
+    } else {
+        elem.classList.add("border-success")
+    }
 }
 
 function submitCreate(){
@@ -525,34 +504,34 @@ function submitCreate(){
     obj.departmentID = $("#departmentCreate").val()
     obj.departmentName = $("#departmentCreate option:selected").text()
     obj.jobTitle = $("#jobTitleCreate").val()
-    console.log(obj)
-    console.log(emailRegex.test(obj.email))
     errArr=[]
-    if ((obj.firstName=="") ||  (obj.lastName=="")){
-        errArr.push("Must Enter First and Last Name")
+    if (obj.firstName==""){
+        errArr.push("Must Enter First Name")
+    }
+    if (obj.lastName==""){
+        errArr.push("Must Enter Last Name")
     } 
     if (obj.email=="" || (emailRegex.test(obj.email) == false)){
         errArr.push("Must enter valid email")
-    }
+    } 
     if (obj.departmentID == ""){
         errArr.push("Must choose a department")
-    }
+    } 
 
-    if(errArr !=[]){
+
+    if(errArr.length > 0){
         $("#alertText").text(errArr.join(" / "))
         $("#alertText").addClass("bg-warning")
         showAlert()
         return
     }
 
-    
     jQuery.ajax({
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
         data: {functionname: 'create', arguments: [obj]},
         success: (obj)=>{
-            console.log(obj)
             if (obj != "ID or Email already in use"){
             displayEntry(obj)
             showAlert()
@@ -573,4 +552,73 @@ function submitCreate(){
         
     })
 
+}
+
+function checkID(elem){
+    console.log(elem)
+    if (elem == undefined){
+        $("#idCreate").removeClass("border-danger")
+        $("#idCreate").removeClass("border-success")
+        return
+    }
+    id=elem.value
+    console.log(id)
+    if (!id){
+        console.log("noid")
+        elem.classList.remove("border-success")
+        elem.classList.remove("border-danger")
+        return
+    }
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: 'checkID', arguments: [id]},
+        success: (obje)=>{
+            console.log(obje)
+            if(elem.id=="idSearch"){
+                console.log("Search")
+                if (obje == "false"){
+                    console.log("Theres a match")
+                    elem.classList.add("border-danger")
+                    elem.classList.remove("border-success")
+                } else {
+                    console.log("No match")
+                    elem.classList.add("border-success")
+                    elem.classList.remove("border-danger")
+                }
+            } else if(elem.id=="idCreate"){
+                console.log("Create")
+                if (obje == "true"){
+                    console.log("No Match")
+                    elem.classList.add("border-danger")
+                    elem.classList.remove("border-success")
+                } else {
+                    console.log("Theres a match")
+                    elem.classList.add("border-success")
+                    elem.classList.remove("border-danger")
+                }
+            }
+            
+        },
+        error: (err)=>{console.log(err.responseText)}
+    })
+    
+}
+
+function fillID(loc){
+    console.log(loc)
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: 'getAvailableIDs'},
+        success: (obje)=>{
+            ranNum = Math.floor(Math.random()*10)
+            $(`#id${loc}`).val(obje[ranNum])
+        },
+        error: (err)=>{console.log(err.responseText)}
+    })
+
+    
 }
