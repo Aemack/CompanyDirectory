@@ -696,7 +696,9 @@ function checkID(elem){
     id=elem.value
     if (!id){
         elem.classList.remove("border-success")
-        elem.classList.remove("border-danger")
+        if (elem=="Search"){
+            elem.classList.remove("border-danger")
+        }
         return
     }
     jQuery.ajax({
