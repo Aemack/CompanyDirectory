@@ -1,6 +1,6 @@
 <?php
 
-$dbName = "id14686068_companydirectory";
+$dbName = "id14680606_companydirectory";
 $dbUser = "root";
 $dbHost = "localhost";
 $dbPass = "";
@@ -26,11 +26,8 @@ function updateDetails($column, $data, $id){
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
 
     if ($column == "id"){
-        $sql= "SELECT * FROM personnel WHERE id=$data";
-        $res = mysqli_query($conn, $sql);
-
-        if ($res){
-            echo "ID is already in use";
+        if(checkID($data) ==="true"){
+            return "invalid id";
         }
 
     }
@@ -326,7 +323,7 @@ function getDepHeadName($depID){
     return [$headName, $headID];
 }
 
-function updateAll($person){
+function updateAll($person, $OldID){
     global $dbName, $dbUser, $dbHost, $dbPass;
 
     $id = $person["id"];
@@ -335,7 +332,8 @@ function updateAll($person){
     $email = $person["email"];
     $departmentID = $person["departmentID"];
     $jobTitle = $person["jobTitle"];
-    unset($person['id']);
+    
+
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
 
     $sql="UPDATE personnel SET ";
@@ -351,7 +349,7 @@ function updateAll($person){
      }
 
 
-     $sql.=" WHERE id=".$id;
+     $sql.=" WHERE id=".$OldID;
 
      $res = mysqli_query($conn, $sql);
 
@@ -500,7 +498,7 @@ switch($_POST['functionname']) {
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
         break;
     case 'updateAll':
-        $result=updateAll(($_POST['arguments'][0]));
+        $result=updateAll(($_POST['arguments'][0]),($_POST['arguments'][1]));
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
         break;
     case 'create':
