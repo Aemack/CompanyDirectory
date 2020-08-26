@@ -1,26 +1,11 @@
 <?php
 
-$dbName = "id14680606_companydirectory";
+$dbName = "companydirectory";
 $dbUser = "root";
 $dbHost = "localhost";
 $dbPass = "";
 
-function updateName($nFirstName,$nSecondName, $id){
-    global $dbName, $dbUser, $dbHost, $dbPass;
-    $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
-    
-    $sql = "UPDATE personnel 
-    SET firstName='$nFirstName',
-    lastName='$nSecondName' 
-    WHERE id=$id";
-
-    $res = mysqli_query($conn, $sql);
-    
-    
-
-    return [$nFirstName,$nSecondName];
-}
-
+//Updates details for individual column
 function updateDetails($column, $data, $id){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
@@ -42,7 +27,7 @@ function updateDetails($column, $data, $id){
 
 }
 
-
+//Gets location IDs and Names from Database
 function getLocations(){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
@@ -69,6 +54,7 @@ function getLocations(){
 
 }
 
+//Gets all data in single row
 function getPersonByID($id){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
@@ -97,6 +83,7 @@ function getPersonByID($id){
 
 }
 
+//Gets departments IDs and Names from Database
 function getDepartments(){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
@@ -119,10 +106,27 @@ function getDepartments(){
         echo "0 results";
       }
 
+      updateJSON($result);
+
       return $result;
 
 }
 
+//Updates department JSON file from database 
+function updateJSON($result){
+    $jsonString = file_get_contents('departments.json');
+    $data = json_decode($jsonString, true);
+    $i=0;
+    // or if you want to change all entries with activity_code "1"
+    foreach ($result as $department){
+        $data[$i] =$department["name"];
+        $i++;
+    }
+    $newJsonString = json_encode($data);
+    file_put_contents('departments.json', $newJsonString);
+}
+
+// Gets departments available in location 
 function getDepartmentsFromLocation($location){
     global $dbName, $dbUser, $dbHost, $dbPass;
     if($location && !empty($location)){
@@ -143,6 +147,7 @@ function getDepartmentsFromLocation($location){
     return $departments;
 }
 
+//Gets the department name from departmentId
 function getDepartmentName($id){
     
     global $dbName, $dbUser, $dbHost, $dbPass;
@@ -157,6 +162,7 @@ function getDepartmentName($id){
 
 }
 
+//Gets location ID from department
 function getLocationIDFromDepartment($departmentID){
     global $dbName, $dbUser, $dbHost, $dbPass;
 
@@ -169,6 +175,7 @@ function getLocationIDFromDepartment($departmentID){
     return $row["locationID"];
 }
 
+//Gets location name from department
 function getLocationFromDepartment($department){
     global $dbName, $dbUser, $dbHost, $dbPass;
 
@@ -181,6 +188,7 @@ function getLocationFromDepartment($department){
     return $locationName;
 }
 
+//Gets the location name from location id
 function getLocationName($locationID){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
@@ -200,6 +208,7 @@ function getLocationName($locationID){
 
 }
 
+//Deletes entry that matches id
 function deleteEntry($id){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
@@ -213,6 +222,7 @@ function deleteEntry($id){
 
 }
 
+//Searches for anything matching person object
 function search($obj){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $result=[];
@@ -310,6 +320,7 @@ function search($obj){
 
 }
 
+//Gets Department head name by department ID
 function getDepHeadName($depID){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
@@ -323,6 +334,7 @@ function getDepHeadName($depID){
     return [$headName, $headID];
 }
 
+//Updates all columns in row
 function updateAll($person, $OldID){
     global $dbName, $dbUser, $dbHost, $dbPass;
 
@@ -356,6 +368,7 @@ function updateAll($person, $OldID){
      return $res;
 }
 
+//Creates new row
 function create($obj){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $result=[];
@@ -407,6 +420,7 @@ function create($obj){
 
 }
 
+//Gives everybody jobs, including assigning Department Heads
 function fillJobs(){
     $jobs = ["Team Member","Team Member","Team Member","Team Member","Team Leader","Team Leader","Manager"];
     global $dbName, $dbUser, $dbHost, $dbPass;
@@ -437,6 +451,7 @@ function fillJobs(){
 
 }
 
+//Checks if ID is already in database 
 function checkID($id){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
@@ -457,6 +472,7 @@ function checkID($id){
     }
 }
 
+//Gets list of 10 available IDs
 function getAvailableIDs(){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
@@ -481,6 +497,10 @@ function getAvailableIDs(){
 }
 
 switch($_POST['functionname']) {
+    case 'getLocationIDFromDepartment':
+        $result=getLocationIDFromDepartment(($_POST['arguments'][0]));
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        break;
     case 'getDepHeadName':
         $result=getDepHeadName(($_POST['arguments'][0]));
         echo json_encode($result, JSON_UNESCAPED_UNICODE);

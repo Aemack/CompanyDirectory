@@ -61,7 +61,7 @@
 
 
 
-
+        <!--Dropdown warning-->
         <div id="collapseAlert" class="collapse fixed-top text-center w-100">
           <div><h6 id="alertText" class="rounded-bottom border-bottom border-dark p-1"></h6><a href="#" class="stretched-link" onmouseover="hideAlert()"></a></div>
         </div>
@@ -70,7 +70,7 @@
 <div id="main">
 
         
-          <!---Search Results-->
+<!---Search Results-->
 
         <div id="searchResults" style="display: none;">
 
@@ -125,7 +125,7 @@
               <div class="form-group row">
                   <label for="departmentSearch" class="col-3 my-auto text-center">Department</label>
                   <div class="col-9">
-                      <select id="departmentSearch" class="form-control"><option value="" selected>Please select</option></select>
+                      <select id="departmentSearch" onchange="blurSearchLocations()" class="form-control"><option value="" selected>Please select</option></select>
                   </div>
               </div>
               <div class="form-group row">
@@ -136,9 +136,9 @@
               </div>
 
               <button type="submit" onclick="submitSearch()" class="btn btn-primary btn-block">Search</button>
-          </form> <!-- /form -->
+          </form> 
         </div>
-      </div> <!-- ./container -->
+      </div> 
 
 
 
@@ -192,9 +192,9 @@
 
             <button type="submit" onclick="submitCreate()" class="btn btn-primary btn-block">Create</button>
             
-          </form> <!-- /form -->
+          </form> 
         </div>
-      </div> <!-- ./container -->
+      </div> 
 
 
         
@@ -202,12 +202,12 @@
 <div id="entry" class="container">
   <div id="entryFormContainer">
           <form onsubmit="return false" id="searchForm"  role="form">
-            <button id="backButton" class="position-absolute btn" onclick="goBackToResults()"><i class="fas fa-arrow-left"></i></button>
+            <button id="backButton" class="position-absolute btn" onclick="submitSearch()"><i class="fas fa-arrow-left"></i></button>
             <h3>Entry</h3>
             <div class="form-group row">
                 <label for="firstNameInput" class="col-3 my-auto text-center">First Name</label>
                 <div class="col-6 my-auto">
-                    <div id="firstNameShow" class="d-flex"><h5 id="firstNameEntry"></h5></div>
+                    <div id="firstNameShow" class="d-flex"><h6 id="firstNameEntry"></h6></div>
                     <input type="text" id="firstNameInput" placeholder="First Name" class="form-control d-none" autofocus>
                 </div>
                 <div class="col-3">
@@ -218,7 +218,7 @@
             <div class="form-group row">
                 <label for="lastNameInput" class="col-3 my-auto text-center">Last Name</label>
                 <div class="col-6">
-                  <div class="d-flex" id="lastNameShow"><h5 id="lastNameEntry"></h5></div>
+                  <div class="d-flex" id="lastNameShow"><h6 id="lastNameEntry"></h6></div>
                     <input type="text"  id="lastNameInput" placeholder="Last Name" class="form-control d-none" autofocus>
                 </div>
                 <div class="col-3">
@@ -229,7 +229,7 @@
             <div class="form-group row">
                 <label for="idInput" class="col-3 my-auto text-center">ID Number</label>
                 <div class="col-6">
-                  <div class="d-flex" id="idShow"><h5 id="idEntry"></h5></div>
+                  <div class="d-flex" id="idShow"><h6 id="idEntry"></h6></div>
                   <div class="input-group">
                   <input type="number"  min="1" step="1" onblur="checkID(this)" oninput="checkID(this)" id="idInput" placeholder="ID Number" autofocus class="form-control d-none">
                   <div id="idGenInput" class="input-group-append d-none">
@@ -245,7 +245,7 @@
             <div class="form-group row">
                 <label for="emailInput" class="col-3 my-auto text-center">Email </label>
                 <div class="col-6">
-                  <div class="d-flex" id="emailShow"><h5 id="emailEntry"></h5></div>
+                  <div class="d-flex" id="emailShow"><h6 id="emailEntry"></h6></div>
                     <input type="email" id="emailInput" placeholder="Email" class="form-control d-none" name= "emailSearch">
                 </div>
                 <div class="col-3">
@@ -256,7 +256,7 @@
             <div class="form-group row">
               <label for="jobTitleInput" class="col-3 my-auto text-center">Job Title</label>
           <div class="col-6">
-            <div class="d-flex" id="jobTitleShow"><h5 class="text-center" id="jobTitleEntry"></h5></div>
+            <div class="d-flex" id="jobTitleShow"><h6 class="text-center" id="jobTitleEntry"></h6></div>
               <input type="text" id="jobTitleInput" placeholder="Job Title" autocomplete="off" class="form-control basicAutoComplete d-none">
           </div>
           <div class="col-3">
@@ -267,10 +267,12 @@
             <div class="form-group row">
                 <label for="departmentInput" class="col-3 my-auto text-center">Department</label>
                 <div class="col-6">
-                  <div class="" id="departmentShow"><h5 class="text-center col"><span id="departmentEntry"></span></h5><br><p class="text-center col"><a id="entryDepHead" href="#"></a></p> </div>
-                    <select id="departmentInput" class="form-control d-none"><option value="" selected>Please select</option></select>
+                  <div class="" id="departmentShow"><h6 class="text-center col my-auto"><span id="departmentEntry"></span></h6><br><p class="text-center col my-auto"><a id="entryDepHead" href="#"></a></p> </div>
+                    <select id="departmentInput" class="form-control"><option value="" selected>Please select</option></select>
                 </div>
-                <div class="col-3"><a onclick="editEntry('department')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a></div>
+                <div class="col-3">
+                  <a id="departmentPen" onclick="editEntry('department')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a>
+                  <a id="departmentTick" class="d-none"  href="#"><i class="p-1 fas fa-check-circle"></i></a></div>
             </div>
 
             <div id="entryButtons">

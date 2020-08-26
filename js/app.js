@@ -1,20 +1,24 @@
 window.onload = function(){
-    //fillJobs()
+    fillJobs()
     windowHeight = ($(window).height() - 58);
     $("#createFormContainer").css(`height`, `${windowHeight}px`)
     $("#searchFormContainer").css(`height`, `${windowHeight}px`)
     $("#entryFormContainer").css(`height`, `${windowHeight}px`)
+    $("#main").css(`height`, `${windowHeight}px`)
     $("#entry").hide()
     $("#create").hide() 
     fillLocations()
     fillDepartments()
     fillAutoComplete()
+
+    
     
     $(document).click(function (event) {
         hideAlert();
     });
 }
 
+//Reloads results from search
 function goBackToResults(){
     $("#search").hide()
     $("#create").hide()
@@ -22,6 +26,7 @@ function goBackToResults(){
     $("#searchResults").show()
 }
 
+//Gets data from JSON file and fills autocomplete for jobTitles
 function fillAutoComplete(){
         $('.basicAutoComplete').autoComplete({
             preventEnter: true,
@@ -32,6 +37,7 @@ function fillAutoComplete(){
         });
 }
 
+//Fills in the jobs and assigning Department Heads
 function fillJobs(){
     jQuery.ajax({
         type: "POST",
@@ -45,10 +51,12 @@ function fillJobs(){
 
 }
 
+//Clears search form
 function clearSearch(){
     $('#searchForm').trigger("reset");
 }
 
+//Clears create form
 function clearCreate(){
     $('#createForm').trigger("reset");
     $('#firstNameCreate').removeClass("border-danger")
@@ -67,6 +75,7 @@ function clearCreate(){
     $('#idCreate').removeClass("border-success")
 }
 
+//Shows and clears create form and hides the rest
 function createClicked(){
     $("#resultList").empty()
     $("#searchResults").hide()
@@ -86,7 +95,7 @@ function createClicked(){
     $('#createForm').trigger("reset");
 }
 
-
+//Shows and clears search form and hides the rest
 function searchClicked(){
     $("#resultList").empty()
     $("#searchResults").hide()
@@ -104,27 +113,31 @@ function searchClicked(){
 
 }
 
+//Shows dropdown alert, then hides it 
 function showAlert(){
     $("#collapseAlert").collapse("show")
     setTimeout(hideAlert,5000)
 
 }
 
+//Hides dropdown
 function hideAlert(){
     $("#collapseAlert").collapse("hide")
 }
 
+//Gets location name and ID from department ID
 function getLocationFromDepartment(depID){
     jQuery.ajax({
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
         data: {functionname: 'getLocationFromDepartment', arguments: [depID]},
-        success: (ob)=>{console.log(ob)},
+        success: (ob)=>{},
         error: (er)=>{console.log(er.responseText)}
     })
 }
 
+//Gets data from search form and querys database 
 function submitSearch(){
     $("#recordOutput").empty();
     obj = {};
@@ -155,6 +168,8 @@ function submitSearch(){
 
 }
 
+//
+//Shows entry div, hides the rest
 function entryClicked(id){
     
     $("#backButton").removeAttr("onclick")
@@ -170,7 +185,9 @@ function entryClicked(id){
     
 }
 
+//Populates entry with details 
 function displayEntry(person){
+    console.log(person)
     $("#searchResults").hide()
     $("#entry").show()
     $("#create").hide()
@@ -258,6 +275,7 @@ function displayEntry(person){
  
 }
 
+//Delets entry from ID
 function deleteEntry(id){
     jQuery.ajax({
         type: "POST",
@@ -277,12 +295,11 @@ function deleteEntry(id){
     })
 }
 
+//Gets all data from edit entry form 
 function saveEntry(id){
     person = {}
     person.id = $("#idInput").val()
     
-    console.log("InputVal "+person.id)
-    console.log("CurVal "+id)
 
     jQuery.ajax({
         type: "POST",
@@ -290,15 +307,12 @@ function saveEntry(id){
         dataType: 'json',
         data: {functionname: 'checkID', arguments: [person.id]},
         success: (obj)=>{
-            console.log(obj)
             if (obj == 'false' || person.id == id){
                 person.firstName = $("#firstNameInput").val()
                 person.lastName = $("#lastNameInput").val()
                 person.email = $("#emailInput").val()
                 person.jobTitle = $("#jobTitleInput").val()
                 person.departmentID = $("#departmentInput option:selected").val()
-                console.log("OLD ID: "+id)
-                console.log("NEW ID: "+person.id)
                 
                 updatePerson(person,id)
 
@@ -322,6 +336,7 @@ function saveEntry(id){
 
 }
 
+//Updates record with matching id
 function updatePerson(person,id){
     jQuery.ajax({
         type: "POST",
@@ -340,6 +355,7 @@ function updatePerson(person,id){
     })
 }
 
+//Shows edit option, hides display
 function editEntry(elem){
     if (elem == "id"){
         $("#idGenInput").removeClass("d-none")
@@ -351,9 +367,49 @@ function editEntry(elem){
     $(`#${elem}Show`).addClass("d-none")
 }
 
+//Makes unavailable locations unchoosable
+function blurSearchLocations(){
+    departmentID = $("#departmentSearch").val()
+    if (departmentID ==""){
+        options = $("#locationSearch").children()
+        for (i=0;i<options.length;i++){
+            options[i].removeAttribute("disabled")
+    }
+    return;
+    }
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: 'getLocationIDFromDepartment', arguments: [departmentID]},
+        success: (obj)=>{
+            options = $("#locationSearch").children()
+            for (i=0;i<options.length;i++){
+                if (obj.value === ""){
+                    options[i].removeAttribute("disabled")
+                    continue;
+                }
+                if (options[i].value == obj){
+                    options[i].removeAttribute("disabled")
+                } else {
+                    options[i].setAttribute("disabled","true")
+                }
+                
+
+            }
+        }
+    })
+
+}
+
+//Updates one column on record 
 function updateSingleCol(id, elem){
-    
-    val = $(`#${elem}Input`).val()
+    if (elem=="departmentID"){
+        val = $(`#departmentInput`).val()
+        console.log(val)
+    } else {
+        val = $(`#${elem}Input`).val()
+    }
     if (elem=="id" && val == id){
         $(`#${elem}Entry`).text($(`#${elem}Input`).val())
             $(`#${elem}Show`).removeClass("d-none")
@@ -376,8 +432,36 @@ function updateSingleCol(id, elem){
             $("#alertText").removeClass("bg-warning")
             $("#alertText").addClass("bg-danger")
             } else {
-            $(`#${elem}Entry`).text($(`#${elem}Input`).val())
-            $(`#${elem}Show`).removeClass("d-none")
+                if (elem == "id"){
+                $("#saveButton").removeAttr("onclick")
+                $("#saveButton").attr("onclick",`saveEntry(${val})`)
+                
+                }
+
+                if (elem =="departmentID"){
+                    elem = "department" 
+                    console.log(val)
+                    jQuery.ajax({
+                        type: "POST",
+                        url: 'php/companydir.php',
+                        dataType: 'json',
+                        data: {functionname: 'getDepHeadName', arguments: [val]},
+                        success: (obj)=>{
+                            console.log(obj)
+                            $(`#entryDepHead`).text(obj[0])
+                            $(`#entryDepHead`).removeAttr("onclick")
+                            $(`#entryDepHead`).attr("onclick",`entryClicked(${obj[1]})`)
+                            console.log("dep")
+                        }, error: (er)=>{console.log(er.responseText)}
+                    })
+                }
+                if (elem =="department"){
+                    $(`#${elem}Entry`).text($(`#${elem}Input :selected`).text())
+                } else {
+                    $(`#${elem}Entry`).text($(`#${elem}Input`).val())
+                }
+                $(`#${elem}Show`).removeClass("d-none")
+            $(`#${elem}Show`).addClass("d-flex")
             $(`#${elem}Pen`).removeClass("d-none")
             $(`#${elem}Tick`).addClass("d-none")
             $(`#${elem}GenInput`).addClass("d-none")
@@ -394,6 +478,8 @@ function updateSingleCol(id, elem){
     })
 }
 
+/*
+//Updates id
 function updateID(id){
     data = $("#idInput").val()
     elem = "id"
@@ -419,6 +505,7 @@ function updateID(id){
 
 }
 
+//Updates email
 function updateEmail(id){
     data = $("#emailInput").val()
     elem = "email"
@@ -438,6 +525,7 @@ function updateEmail(id){
 
 }
 
+//Updates jobTitle
 function updatejobTitle(id){
     data = $("#jobTitleInput").val()
     elem = "jobTitle"
@@ -489,9 +577,11 @@ function updateLocation(departmentID){
     })
 
 }
+*/
 
+//Show search reuslts and populate with list 
 function showResults(res){
-    clearSearch()
+    //clearSearch()
     $("#entry").hide()
     
 
@@ -534,6 +624,7 @@ function showResults(res){
     })
 }
 
+//Fills the location options from database
 function fillLocations(){
     jQuery.ajax({
         type: "POST",
@@ -553,6 +644,7 @@ function fillLocations(){
     })
 }
 
+//Fills the department options from database
 function fillDepartments(){
     jQuery.ajax({
         type: "POST",
@@ -585,13 +677,12 @@ function fillDepartments(){
 
             })
         },
-        error: (er)=>{console.log(er)}
+        error: (er)=>{console.log(er.responseText)}
         
     })
 }
 
-
-
+//Checks if email is valid and changes border 
 function checkEmail(elem){
     emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
     elem.classList.remove("bg-success")    
@@ -607,6 +698,7 @@ function checkEmail(elem){
     
 }
 
+//Checks if element is empty
 function checkEmpty(elem){
     elem.classList.remove("border-success")    
     elem.classList.remove("border-danger")
@@ -617,6 +709,7 @@ function checkEmpty(elem){
     }
 }
 
+//Submits create form, checks for valid values
 function submitCreate(){
     emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
     obj = {};
@@ -687,6 +780,7 @@ function submitCreate(){
 
 }
 
+//Checks for valid ID (if it exists in search/if it doesn't in create)
 function checkID(elem){
     if (elem == undefined){
         $("#idCreate").removeClass("border-danger")
@@ -731,6 +825,7 @@ function checkID(elem){
     
 }
 
+//Fills ID with valid number from database
 function fillID(loc){
     jQuery.ajax({
         type: "POST",
