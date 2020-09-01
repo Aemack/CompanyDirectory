@@ -1,107 +1,80 @@
 var activeDepartmentTabs = [];
 var activeLocationTabs = [];
+var searchResults = [];
 var activeElem;
 var scrollHeight;
 var savedHeight;
 var activeUser;
+var activeWindow;
 
+//Get scroll value on scroll
 window.addEventListener("scroll", (event) => {
     scrollHeight = this.scrollY;
 });
 
 window.onload = function(){
+    //Untick to fill in jobs
     //fillJobs()
-    windowHeight = ($(window).height() - 58);
+    
 
+
+    //Gets available window height to resize boxes
+    windowHeight = ($(window).height() - 66);
+
+    //Prevents sign in form refreshing page
     $('#signInForm').submit(function (e) {
-        console.log(e)
         e.preventDefault();
     })
 
+    //Puts focus on username input
     $("#usernameInput").focus()
+
+    //Gives menu button control over sidebar
+    $("#menuButton").click(function(){
+        $('.sidebar-container').toggleClass('sidebar-container-active')
+        $("#menuButton").toggleClass('menu-active')
+    })
+
+    //Hides sidebar when clicking outside nav
+    $("#main").click(function (event){
+        hideSidebar()   
+    })
     
-    
+    //Hides alert on click anywhere on window
     $(document).click(function (event) {
         hideAlert();
     });
 }
 
+        /*!!!! FILL VALUES !!!!*/
 
-function logoutClicked(){
-    $("#openPage").css("opacity","1")
-    $("#openPage").show()
-    $("#directoryList").empty()
-    $("#resultList").empty()
-    $("#signInForm").collapse("show")
-}
-
-function loginClicked(){
-    username = $("#usernameInput").val()
-    password = $("#passwordInput").val()
-
-    if ((username == "") || (password=="")){
-        loginFailed()
-        return
-    }
-    $("#signInForm").collapse("hide")
-
-    console.log("Username "+username)
-    console.log("Password "+password)
-    
-    verifyLogin(username,password)
-}
-
-function verifyLogin(username,password){
-    console.log(password)
-    jQuery.ajax({
-        type: "POST",
-        url: 'php/companydir.php',
-        dataType: 'json',
-        data: {functionname: `verifyLogin`, arguments: [username,password]},
-        success: (obj)=>{
-            console.log(obj)
-            if (obj ==true){
-                loginVerified(username)
-                activeUser = username            
-            } else {
-                loginFailed()
-            }
-        },
-        error: (err)=>{console.log(err.responseText)}
-    })
-}
-
-function loginFailed(){
-    $("#signInForm").addClass("show")
-    $("#usernameInput").addClass("border-danger")
-    $("#passwordInput").addClass("border-danger")
-    showAlert()
-    $("#alertText").text("Login Details Incorrect")
-    $("#alertText").removeClass("bg-success")
-    $("#alertText").removeClass("bg-warning")
-    $("#alertText").addClass("bg-danger")
-}
-
-function loginVerified(username){
-    $( "#openPage" ).animate({
-        opacity: 0
-    }, 1000, function() {
-        $("#openPage").hide()
+//Gets data from JSON file and fills autocomplete for jobTitles
+function fillAutoComplete(){
+    $('.basicAutoComplete').autoComplete({
+        preventEnter: true,
+        minLength:0,
+        resolverSettings: {
+            url: 'jobTitles.json'
+        }
     });
-    fillAutoComplete()
-    groupByLocation();
-    if (activeUser != "admin"){
-        //$("#createTab").addClass("d-none")
-    } else {
-        //$("#createTab").removeClass("d-none")
-    }
+    
 }
 
-function getElementLocation(elem){
-    savedHeight = scrollHeight
-    console.log(savedHeight)
+//Fills in the jobs and assigning Department Heads
+function fillJobs(){
+jQuery.ajax({
+    type: "POST",
+    url: 'php/companydir.php',
+    dataType: 'json',
+    data: {functionname: 'fillJobs'},
+    success: (obj)=>{console.log("JOBS FILLED "+obj)},
+    error: (er)=>{console.log(er.responseText)}
+    
+})
+
 }
 
+//Fills directory with all results of search
 function fillDirectory(){
     obj = {firstName:"",lastName:"",email:"",id:"",department:"",location:"",jobTitle:""}
     jQuery.ajax({
@@ -110,13 +83,12 @@ function fillDirectory(){
         dataType: 'json',
         data: {functionname: 'search', arguments: [obj]},
         success: (res)=>{
-            console.log(res)
         i=0;
         res.forEach(function(record){
             if (i%2==0){
-                recordHTML = `<li class="list-group-item bg-light h-10">`
+                recordHTML = `<li class="list-group-item h-10">`
             } else {
-                recordHTML = `<li class="list-group-item bg-grey h-10">`
+                recordHTML = `<li class="list-group-item h-10">`
             }
             recordHTML += `
             <h4>${record.firstName} ${record.lastName}</h4>
@@ -142,13 +114,282 @@ function fillDirectory(){
 
 
 
-            $(`#collapse${record.departmentName.split(" ").join("")}`).append(recordHTML)
+            $(`#collapse${record.departmentName.replace(/[^a-zA-Z]/g, "")}`).append(recordHTML)
             i++;
         })}
 })
 }
- 
 
+//Fills the location options from database
+function fillLocations(){
+    $("#locationSearch").empty()
+    $("#locationCreate").empty()
+
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: 'getLocations'},
+        success: (obje)=>{
+            obje.forEach(function(location){
+                option = document.createElement("option") 
+                option.value = location.id;
+                option.text = location.name;
+                $('#locationSearch').append(option)
+
+                
+                option1 = document.createElement("option") 
+                option1.value = location.id;
+                option1.text = location.name;
+                $('#locationCreate').append(option1)
+
+                
+            })
+            
+            $('#locationSearch').selectpicker();
+        },
+        error: (er)=>{console.log(er)}
+        
+    })
+}
+
+//Fills ID with valid number from database
+function fillID(loc){
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: 'getAvailableIDs'},
+        success: (obje)=>{
+            ranNum = Math.floor(Math.random()*10)
+            $(`#id${loc}`).val(obje[ranNum])
+            $(`#id${loc}`).removeClass("border-danger")
+            $(`#id${loc}`).addClass("border-success")
+        },
+        error: (err)=>{console.log(err.responseText)}
+    })
+
+    
+}
+
+// Fills dashboard with data from database
+function fillDashboard(){
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: `getDashboardData`},
+        success: (obj)=>{
+            $("#dashboardLocationsList").empty()
+            $("#dashboardDepartmentsList").empty()
+            $("#dashboardPersonnelList").empty()
+            
+            $("#locationCardDisplay").text(obj.location)
+            $("#departmentCardDisplay").text(obj.department)
+            $("#personnelCardDisplay").text(obj.personnel)
+
+            obj.locations.forEach((location)=>{
+                locationHtml= `<li class="dashboard-list-item class="text-center">${location.name}<div id="${location.name.replace(/[^a-zA-Z]/g, "")}DashboardCount"></div></br></li>`
+                $("#dashboardLocationsList").append(locationHtml)
+            })
+
+            obj.departments.forEach((department)=>{
+                departmentHtml= `<li class="dashboard-list-item class="text-center">${department.name}<div id="${department.name.replace(/[^a-zA-Z]/g, "")}DashboardCount"></div></li></br>`
+                $("#dashboardDepartmentsList").append(departmentHtml)
+            })
+
+            obj.depHeads.forEach((depHead)=>{
+                    depHeadsHtml= `<li data-target="#entryModal" data-toggle="modal" class="dashboard-list-item class="text-center"><a href="#" onclick="entryClicked(${depHead.id})">${depHead.firstName} ${depHead.lastName}</a><div id="${depHead.departmentID.replace(/[^a-zA-Z]/g, "")}DashboardCount"></div></li></br>`
+                    $("#dashboardPersonnelList").append(depHeadsHtml)
+                
+            })
+            
+        },
+        error: (er)=>{console.log(er)}
+    })
+}
+
+//Fills the department options from database
+function fillDepartments(){
+    $('#departmentSearch').empty()
+    $('#departmentInput').empty()
+    $('#departmentCreate').empty()
+
+    emptyOption = '<option value="" selected>Please select</option>'
+    //$('#departmentSearch').append(emptyOption)
+    $('#departmentInput').append(emptyOption)
+    $('#departmentCreate').append(emptyOption)
+
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: 'getDepartments'},
+        success: (obje)=>{
+            obje.forEach(function(department){
+                option = document.createElement("option")
+                option.value = department.id;
+                option.text = department.name;
+                $('#departmentSearch').append(option)
+
+                option2 = document.createElement("option")
+                option2.value = department.id;
+                option2.text = department.name;
+                $('#departmentCreate').append(option2)
+
+                option3 = document.createElement("option")
+                option3.value = department.id;
+                option3.text = department.name;
+                $('#departmentInput').append(option3)
+
+
+
+                
+                
+
+                
+
+            })
+            
+            $('#departmentSearch').selectpicker();
+        },
+        error: (er)=>{console.log(er.responseText)}
+        
+    })
+}
+
+//Hides the Sidebar
+function hideSidebar(){
+    $('.sidebar-container').removeClass('sidebar-container-active')
+    $("#menuButton").removeClass('menu-active')
+}
+
+//Reloads dashboard/directory/searchResult data
+function reloadData(){
+    fillDepartments()
+    fillLocations()
+    fillAutoComplete()
+    if ($("#directory").css("display") != "none"){
+        option = $("#groupBySelect").val();
+        switch (option){
+            case 'locations':
+                groupByLocation()
+                break; 
+            case 'departments':
+                groupByDepartment()
+                break;
+            case 'none':
+                groupByNone()
+                break;
+            default:
+                groupByLocation()
+                breaks;
+        }
+
+
+        activeWindow="directory"
+    } else if ($("#searchResults").css("display") != "none"){
+        activeWindow="searchResults"
+        submitSearch()
+    } else {
+        fillDashboard()
+        activeWindow="dashboard"
+    }
+
+
+}
+
+
+        /*!!!! LOGIN !!!!*/
+
+
+
+//Emptys results and directory, shows sign in screen
+function logoutClicked(){
+    $("#openPage").css("opacity","1")
+    $("#directory").hide("")
+    $("#searchResults").hide("")
+    $(".openPageImage").removeClass("openPage-animated")
+    $("#openPage").show()
+    $("#directoryList").empty()
+    $("#resultList").empty()
+    $("#signInForm").collapse("show")
+}
+
+//Checks if username and pasword have been entered 
+function loginClicked(){
+    username = $("#usernameInput").val()
+    password = $("#passwordInput").val()
+
+    if ((username == "") || (password=="")){
+        loginFailed()
+        return
+    }
+    $("#signInForm").collapse("hide")
+
+    
+    verifyLogin(username,password)
+}
+
+//Verifies username and password agaimst the database
+function verifyLogin(username,password){
+    fillLocations()
+    fillDepartments()
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: `verifyLogin`, arguments: [username,password]},
+        success: (obj)=>{
+            if (obj ==true){
+                loginVerified(username)
+                activeUser = username            
+            } else {
+                loginFailed()
+            }
+        },
+        error: (err)=>{console.log(err.responseText)}
+    })
+}
+
+//Shows alert/keeps sign in form in view
+function loginFailed(){
+    $("#signInForm").addClass("show")
+    $("#usernameInput").addClass("border-danger")
+    $("#passwordInput").addClass("border-danger")
+    showAlert()
+    $("#alertText").text("Login Details Incorrect")
+    $("#alertText").removeClass("bg-success")
+    $("#alertText").removeClass("bg-warning")
+    $("#alertText").addClass("bg-danger")
+}
+
+//Hides sign in form / fills and shows dashboard
+function loginVerified(username){
+    fillDashboard()
+    $("#dashboard").show()
+    $("#usernameDisplay").text(username)
+    $("#searchResults").hide("")
+    $(".openPageImage").addClass("openPage-animated")
+    $( "#openPage" ).animate({
+        opacity: 0,
+    }, 1000, function() {
+        $("#openPage").hide()
+    });
+    fillAutoComplete()
+}
+
+
+
+
+        /*!!!! DIRECTORY !!!!*/
+
+
+function getElementLocation(elem){
+    savedHeight = scrollHeight
+}
+
+//Calls appropriate function when group by option is changed
 function groupByChanged(elem){
     option = elem.value
     activeDepartmentTabs = [];
@@ -163,6 +404,9 @@ function groupByChanged(elem){
         case 'none':
             groupByNone()
             break;
+        default:
+            groupByLocation()
+            breaks;
     }
 }
 
@@ -187,6 +431,7 @@ function groupByLocation(){
     displayLocationsList()
 }
 
+//Displays all entries individualy
 function displayPersonnel(){
     obj = {firstName:"",lastName:"",email:"",id:"",department:"",location:"",jobTitle:""}
     jQuery.ajax({
@@ -197,7 +442,7 @@ function displayPersonnel(){
         success: (people)=>{
             i=0;
             people.forEach((record)=>{
-                personHtml = `<li class="list-group-item bg-light h-10">
+                personHtml = `<li class="list-group-item h-10">
                 <h4>${record.firstName} ${record.lastName}</h4>
                 <h5>${record.email}</h5>
                 <div class="row"><div class="col">ID:${record.id}</div><div class="col float-right">${record.departmentName}</div></div>
@@ -211,6 +456,7 @@ function displayPersonnel(){
 
 }
 
+//Displays entries under department headings
 function displayDepartmentsList(){
     obj = {firstName:"",lastName:"",email:"",id:"",department:"",location:"",jobTitle:""}
     jQuery.ajax({
@@ -221,8 +467,8 @@ function displayDepartmentsList(){
         success: (locandDep)=>{
             departments = locandDep[0]
             departments.forEach((department)=>{
-                departmentHtml = `<li class="list-group-item" id="${department.name.split(" ").join("")}" type="button" data-toggle="collapse" act="0" onclick="dropdownOpened(this)" data-target="#collapse${department.name.split(" ").join("")}" aria-expanded="false" aria-controls="collapse${department.name.split(" ").join("")}">${department.name} <span class="float-right" id="${department.name.split(" ").join("")}Count"></span></li>
-                <ul id="collapse${department.name.split(" ").join("")}" class="collapse"></ul>`
+                departmentHtml = `<li class="list-group-item" id="${department.name.replace(/[^a-zA-Z]/g, "")}" type="button" data-toggle="collapse" act="0" onclick="departmentDropdownOpened(this)" data-target="#collapse${department.name.replace(/[^a-zA-Z]/g, "")}" aria-expanded="false" aria-controls="collapse${department.name.replace(/[^a-zA-Z]/g, "")}">${department.name} <span class="float-right" id="${department.name.replace(/[^a-zA-Z]/g, "")}Count"></span></li>
+                <ul id="collapse${department.name.replace(/[^a-zA-Z]/g, "")}" class="collapse"></ul>`
                 $("#directoryList").append(departmentHtml)
                 displayPersonnelList(department.id,department.name)
             })
@@ -231,6 +477,7 @@ function displayDepartmentsList(){
 
 }
 
+//Displays entries under location headings
 function displayLocationsList(){
     obj = {firstName:"",lastName:"",email:"",id:"",department:"",location:"",jobTitle:""}
     
@@ -243,8 +490,8 @@ function displayLocationsList(){
             locations = locandDep[1]
             departments = locandDep[0]
             locations.forEach((location)=>{
-                locationHtml = `<li class="list-group-item" id="${location.name.split(" ").join("")}" type="button" data-toggle="collapse" act="0" onclick="dropdownOpened(this)" data-target="#collapse${location.name.split(" ").join("")}" aria-expanded="false" aria-controls="collapse${location.name.split(" ").join("")}">${location.name} <span class="float-right" id="${location.name.split(" ").join("")}Count"></span></li>
-                <ul id="collapse${location.name.split(" ").join("")}" class="collapse"></ul>`
+                locationHtml = `<li class="list-group-item" id="${location.name.replace(/[^a-zA-Z]/g, "")}" type="button" data-toggle="collapse" act="0" onclick="dropdownOpened(this)" data-target="#collapse${location.name.replace(/[^a-zA-Z]/g, "")}" aria-expanded="false" aria-controls="collapse${location.name.replace(/[^a-zA-Z]/g, "")}">${location.name} <span class="float-right" id="${location.name.replace(/[^a-zA-Z]/g, "")}Count"></span></li>
+                <ul id="collapse${location.name.replace(/[^a-zA-Z]/g, "")}" class="collapse"></ul>`
                 $("#directoryList").append(locationHtml)
                 
             })
@@ -263,11 +510,11 @@ function displayLocationDepartmentsList(locations){
             data: {functionname: `getDepartmentNamesAndIdsFromLocation`, arguments: [location.id]},
             success: (departments)=>{
                 for (i=0;i<departments[0].length;i++){
-                    locationHtml = `<li class="list-group-item" id="${departments[1][i].split(" ").join("")}" onclick="departmentDropdownOpened(this)"type="button" data-toggle="collapse" act="0" data-target="#collapse${departments[1][i].split(" ").join("")}" aria-expanded="false" aria-controls="collapse${departments[1][i].split(" ").join("")}">${departments[1][i]} <span class="float-right" id="${departments[1][i].split(" ").join("")}Count"></span></li>
-                    <ul id="collapse${departments[1][i].split(" ").join("")}" class="collapse"></ul>`
-                    $(`#collapse${location.name.split(" ").join("")}`).append(locationHtml)
+                    locationHtml = `<li class="list-group-item" id="${departments[1][i].replace(/[^a-zA-Z]/g, "")}" onclick="departmentDropdownOpened(this)"type="button" data-toggle="collapse" act="0" data-target="#collapse${departments[1][i].replace(/[^a-zA-Z]/g, "")}" aria-expanded="false" aria-controls="collapse${departments[1][i].replace(/[^a-zA-Z]/g, "")}">${departments[1][i]} <span class="float-right" id="${departments[1][i].replace(/[^a-zA-Z]/g, "")}Count"></span></li>
+                    <ul id="collapse${departments[1][i].replace(/[^a-zA-Z]/g, "")}" class="collapse"></ul>`
+                    $(`#collapse${location.name.replace(/[^a-zA-Z]/g, "")}`).append(locationHtml)
                     displayPersonnelList(departments[0][i],departments[1][i])
-                    $(`#${location.name.split(" ").join("")}Count`).text(i+1)
+                    $(`#${location.name.replace(/[^a-zA-Z]/g, "")}Count`).text(i+1)
                 }
                 
             }
@@ -286,7 +533,7 @@ function displayPersonnelList(departmentId, departmentName){
         success: (people)=>{
             i=0;
             people.forEach((record)=>{
-                personHtml = `<li class="list-group-item bg-light h-10">
+                personHtml = `<li class="list-group-item h-10">
                 <h4>${record.firstName} ${record.lastName}</h4>
                 <h5>${record.email}</h5>
                 <div class="row"><div class="col">ID:${record.id}</div><div class="col float-right">${record.departmentName}</div></div>
@@ -294,9 +541,9 @@ function displayPersonnelList(departmentId, departmentName){
                 <a href="#" id="${record.id}" data-toggle="modal" data-target="#entryModal" onclick="entryClicked(${record.id}), getElementLocation(this)" class="stretched-link"></a>
                 </li>`
         
-                        $(`#collapse${departmentName.split(" ").join("")}`).append(personHtml)
+                        $(`#collapse${departmentName.replace(/[^a-zA-Z]/g, "")}`).append(personHtml)
                         i++
-                        $(`#${departmentName.split(" ").join("")}Count`).text(i)
+                        $(`#${departmentName.replace(/[^a-zA-Z]/g, "")}Count`).text(i)
 
                     })
                     openActiveTabs()
@@ -307,6 +554,7 @@ function displayPersonnelList(departmentId, departmentName){
 
 }
 
+//Restyles and opens active lists 
 function openActiveTabs(){
     
     
@@ -334,10 +582,8 @@ function dropdownOpened(elem){
     
     id = elem.getAttribute('id')
     
-    console.log(elem)
     
     isActive = elem.getAttribute('act')
-    console.log(isActive)
 
     if (isActive == 0){
         id = elem.getAttribute('id')
@@ -346,7 +592,6 @@ function dropdownOpened(elem){
         elem.classList.add("font-weight-bold")
         elem.setAttribute("act",1)
         activeLocationTabs.push(id)
-        console.log(id)
     } else {
         elem.classList.remove("bg-primary")
         elem.classList.remove("text-light")
@@ -357,7 +602,6 @@ function dropdownOpened(elem){
 }
 
 function departmentDropdownOpened(elem){
-    console.log(elem)
     isActive = elem.getAttribute('act')
     id = elem.getAttribute('id')
 
@@ -376,66 +620,21 @@ function departmentDropdownOpened(elem){
     }
 }
 
-//Reloads results from search
-function goBackToResults(){
-    $("#search").hide()
-    $("#create").hide()
-    $("#entry").hide()
-    $("#searchResults").show()
-}
-
-//Gets data from JSON file and fills autocomplete for jobTitles
-function fillAutoComplete(){
-        $('.basicAutoComplete').autoComplete({
-            preventEnter: true,
-            minLength:0,
-            resolverSettings: {
-                url: '../departments.json'
-            }
-        });
-}
-
-//Fills in the jobs and assigning Department Heads
-function fillJobs(){
-    jQuery.ajax({
-        type: "POST",
-        url: 'php/companydir.php',
-        dataType: 'json',
-        data: {functionname: 'fillJobs'},
-        success: (obj)=>{console.log("JOBS FILLED "+obj)},
-        error: (er)=>{console.log(er.responseText)}
-        
-    })
-
-}
-
-//Clears search form
-function clearSearch(){
-    $('#searchForm').trigger("reset");
-}
-
-//Clears create form
-function clearCreate(){
-    $('#createForm').trigger("reset");
-    $('#firstNameCreate').removeClass("border-danger")
-    $('#firstNameCreate').removeClass("border-success")
-
-    $('#lastNameCreate').removeClass("border-danger")
-    $('#lastNameCreate').removeClass("border-success")
-    
-    $('#emailCreate').removeClass("border-danger")
-    $('#emailCreate').removeClass("border-success")
-
-    $('#jobTitleCreate').removeClass("border-danger")
-    $('#jobTitleCreate').removeClass("border-success")
-    
-    $('#idCreate').removeClass("border-danger")
-    $('#idCreate').removeClass("border-success")
-}
-
-function directoryClicked(){
+//Hides searchResults/directory and shows dashboard
+function dashboardClicked(){
+    fillDashboard()
+    hideSidebar()
+    $("#dashboard").show()
     $("#searchResults").hide();
-    $("#search").hide();
+    $("#directory").hide();
+}
+
+//Hides searchResults/dashboard and shows directory
+function directoryClicked(){
+    groupByLocation();
+    hideSidebar()
+    $("#dashboard").hide()
+    $("#searchResults").hide();
     $("#entry").hide();
     $("#create").hide();
     $("#directory").show();
@@ -450,123 +649,7 @@ function directoryClicked(){
     $("#createTabCheck").text("")
 }
 
-function createDepartmentClicked(){
-    $("#departmentCreateForm").trigger('reset')
-    $("#createModalLabel").text("Department")
-    $("#departmentCreateForm").removeClass("d-none")
-    $("#personCreateForm").addClass("d-none")
-    $("#locationCreateForm").addClass("d-none")
-    $("#createButton").removeAttr("onclick")
-    $("#createButton").attr("onclick", "createDepartment()")
-}
-
-function createLocationClicked(){
-    $("#locationCreateForm").trigger('reset')
-    $("#createModalLabel").text("Location")
-    $("#departmentCreateForm").addClass("d-none")
-    $("#personCreateForm").addClass("d-none")
-    $("#locationCreateForm").removeClass("d-none")
-    $("#createButton").removeAttr("onclick")
-    $("#createButton").attr("onclick", "createLocation()")
-
-}
-
-function createPersonClicked(){
-    groupByLocation()
-    $("#personCreateForm").trigger('reset')
-    $("#createModalLabel").text("Person")
-    $("#departmentCreateForm").addClass("d-none")
-    $("#locationCreateForm").addClass("d-none")
-    $("#personCreateForm").removeClass("d-none")
-    $("#createButton").removeAttr("onclick")
-    $("#createButton").attr("onclick", "submitCreate()")
-
-}
-
-function createDepartment(){
-    departmentName = $("#departmentInputCreate").val();
-    locationid = $("#locationCreate").val()
-    jQuery.ajax({
-        type: "POST",
-        url: 'php/companydir.php',
-        dataType: 'json',
-        data: {functionname: 'addDepartment', arguments:[departmentName,locationid]},
-        success: (obj)=>{
-            if(obj == true){
-                showAlert()
-                groupByLocation()
-                $("#alertText").text("Department Successfully Added")
-                $("#alertText").removeClass("bg-danger")
-                $("#alertText").removeClass("bg-warning")
-                $("#alertText").addClass("bg-success")
-                $("#createModal").modal('hide')
-            } else {
-                showAlert()
-                $("#alertText").text("Department Already Exists")
-                $("#alertText").removeClass("bg-danger")
-                $("#alertText").addClass("bg-warning")
-                $("#alertText").removeClass("bg-success")
-                $("#createModal").modal('show')
-            }
-        },
-        error: (er)=>{console.log(er.responseText)}
-        
-    })
-
-}
-
-function createLocation(){
-    locationName = $("#locationInputCreate").val();
-        jQuery.ajax({
-        type: "POST",
-        url: 'php/companydir.php',
-        dataType: 'json',
-        data: {functionname: 'addLocation', arguments:[locationName]},
-        success: (obj)=>{
-            if(obj == true){            
-                groupByLocation()
-                showAlert()
-                $("#alertText").text("Location Successfully Added")
-                $("#alertText").removeClass("bg-danger")
-                $("#alertText").removeClass("bg-warning")
-                $("#alertText").addClass("bg-success")
-                $("#createModal").modal('hide')
-            } else {
-                showAlert()
-                $("#alertText").text("Location Already Exists")
-                $("#alertText").removeClass("bg-danger")
-                $("#alertText").addClass("bg-warning")
-                $("#alertText").removeClass("bg-success")
-                $("#createModal").modal('show')
-            }
-        },
-        error: (er)=>{console.log(er.responseText)}
-        
-    })
-
-}
-
-//Shows and clears search form and hides the rest
-function searchClicked(){
-    $("#resultList").empty()
-    $("#searchResults").hide()
-    $("#directory").hide()
-    $("#entry").hide()
-    $("#create").hide()
-    $("#createTab").removeClass("active");
-    $("#createTab").addClass("text-light");
-    $("#search").show()
-    $("#searchTab").addClass("active");
-    $("#searchTab").removeClass("text-light");
-    $("#searchTabCheck").text("(current)")
-    $("#createTabCheck").text("")
-    $('#searchForm').trigger("reset");
-    $("#directoryTab").removeClass("active")
-    $("#directoryTab").removeClass("text-dark")
-    $("#directoryTab").addClass("text-light");
-
-
-}
+        /*!!!! ALERT !!!!*/
 
 //Shows dropdown alert, then hides it 
 function showAlert(){
@@ -580,50 +663,184 @@ function showAlert(){
 function hideAlert(){
     $("#collapseAlert").collapse("hide")
 }
+        /*!!!! SEARCH !!!!*/
 
-//Gets location name and ID from department ID
-function getLocationFromDepartment(depID){
-    jQuery.ajax({
-        type: "POST",
-        url: 'php/companydir.php',
-        dataType: 'json',
-        data: {functionname: 'getLocationFromDepartment', arguments: [depID]},
-        success: (ob)=>{},
-        error: (er)=>{console.log(er.responseText)}
-    })
+//Shows and clears search form and hides the rest
+function searchClicked(){
+    $("#searchForm").trigger("reset")
+    $("#menuButton").removeClass('menu-active')
+    $(".sidebar-container").removeClass("sidebar-container-active")
+    $("#searchModal").modal("show")
+    
+    $("#departmentSearch").selectpicker("refresh");
+    $("#locationSearch").selectpicker("refresh");
+    $('#locationSearch').selectpicker('deselectAll')
+    
+    $('#departmentSearch').selectpicker('deselectAll')
+
+
 }
 
-//Gets data from search form and querys database 
+//Clears search form
+function clearSearch(){
+    $('#searchForm').trigger("reset");
+}
+
 function submitSearch(){
+
+    //Gets data from form and saves it to object
     obj = {};
     obj.firstName = $("#firstNameSearch").val()
     obj.lastName = $("#lastNameSearch").val()
     obj.email = $("#emailSearch").val()
     obj.id = $("#idSearch").val()
-    obj.location = $("#locationSearch").val()
-    obj.department = $("#departmentSearch").val()
+    obj.locationArray = $("#locationSearch").val()
+    obj.departmentArray = $("#departmentSearch").val()
     obj.jobTitle = $("#jobTitleSearch").val()
-    jQuery.ajax({
-        type: "POST",
-        url: 'php/companydir.php',
-        dataType: 'json',
-        data: {functionname: 'search', arguments: [obj]},
-        success: showResults,
-        error: (er)=>{
-            showAlert();
-            $("#alertText").text("No Results")
-            $("#alertText").addClass("bg-warning")
-        }
-        
-    })
+    obj.locationNames = $("button[data-id='locationSearch'] .filter-option .filter-option-inner-inner").text()
+    obj.locationNames = obj.locationNames.split(",")
+    obj.departmentNames = $("button[data-id='departmentSearch'] .filter-option-inner-inner").text()
+    
 
+    //Sanitizes data
+    if (obj.departmentNames[0] == "Leave blank to search all..." || obj.departmentArray == null){
+        obj.departmentNames[0] = ""
+        obj.departmentArray = []
+        obj.departmentArray[0] = ""
+    } else {
+        obj.departmentNames = obj.departmentNames.split(",")
+    }
+
+    if (obj.locationNames[0] == "Leave blank to search all..." || obj.locationArray == null){
+        obj.locationNames[0] = ""
+        obj.locationArray = []
+        obj.locationArray[0] = ""
+    }
+    
+    for (i=0;i<obj.departmentNames.length;i++){
+        obj.departmentNames[i] = obj.departmentNames[i].trim()
+    }
+
+
+    //Checks whether any departments/locations have been provided
+    if (obj.locationArray != null){
+        searchLocations(obj)
+    } else if (obj.departmentArray != null){
+        obj.location = ""
+        searchLocations(obj)
+    } else {
+        obj.location = ""
+        obj.department = ""
+        searchLocations(obj)
+    }
 }
 
+function searchLocations(obj){
+    promises = []
+    obj.locationArray.forEach((locationId)=>{
+        obj.location = locationId
+        obj.departmentArray.forEach((departmentId)=>{
+            obj.department = departmentId
+
+            res = jQuery.ajax({
+                type: "POST",
+                url: 'php/companydir.php',
+                dataType: 'json',
+                data: {functionname: 'search', arguments: [obj]},
+                success: (result)=>{},
+                error:(err)=>{console.log(err.responseText)}
+            })
+            promises.push(res)        
+        })
+    })
+    Promise.allSettled( promises ).then(function(object) {
+        showResultsUnderLocation(object)
+    })
+}
+
+function showResultsUnderLocation(results){
+    $("#resultList").empty()
+    peopleArrays=[]
+    results.forEach((result)=>{
+        if (result.status == "fulfilled"){
+            result.value.forEach((res)=>{
+                peopleArrays.push(res)
+            })
+        }
+    })
+    
+    peopleArrays.forEach((person)=>{
+        
+
+        //Creates Location Headers
+        if (!$(`#collapse${person.locationName.replace(/[^a-zA-Z]/g, "")}Search`).length){
+        locationHtml = `<li class="list-group-item" id="${person.locationName.replace(/[^a-zA-Z]/g, "")}Title" type="button" data-toggle="collapse" act="0" onclick="dropdownOpened(this)" data-target="#collapse${person.locationName.replace(/[^a-zA-Z]/g, "")}Search" aria-expanded="false" aria-controls="collapse${person.locationName.replace(/[^a-zA-Z]/g, "")}Search">${person.locationName} <span class="float-right" id="${person.locationName.replace(/[^a-zA-Z]/g, "")}SearchCount"></span></li>
+        <ul id="collapse${person.locationName.replace(/[^a-zA-Z]/g, "")}Search" class="collapse"></ul>`
+        $("#resultList").append(locationHtml)
+        }
+
+        //Creates Department Headers
+        if (!$(`#collapse${person.departmentName.replace(/[^a-zA-Z]/g, "")}Search`).length){
+            departmentHtml = `<li class="list-group-item" id="${person.departmentName.replace(/[^a-zA-Z]/g, "")}Title" type="button" data-toggle="collapse" act="0" onclick="departmentDropdownOpened(this)" data-target="#collapse${person.departmentName.replace(/[^a-zA-Z]/g, "")}Search" aria-expanded="false" aria-controls="collapse${person.departmentName.replace(/[^a-zA-Z]/g, "")}Search">${person.departmentName} <span class="float-right" id="${person.departmentName.replace(/[^a-zA-Z]/g, "")}SearchCount"></span></li>
+            <ul id="collapse${person.departmentName.replace(/[^a-zA-Z]/g, "")}Search" class="collapse"></ul>`
+            $(`#collapse${person.locationName.replace(/[^a-zA-Z]/g, "")}Search`).append(departmentHtml)
+            }
+
+        //Creates Records
+        recordHTML = `<li class="list-group-item h-10 search-record">
+        <h4>${person.firstName} ${person.lastName}</h4>
+        <h5>${person.email}</h5>
+        <div class="row">
+            <div class="col">
+                ID:${person.id}
+            </div>
+            <div class="col">
+            ${person.jobTitle}
+            </div>
+      </div>
+      <div class="row">
+        <div class="col">
+                ${person.locationName}
+            </div>
+            <div class="col">
+             ${person.departmentName} (<i>${person.departmentHead}</i>)
+            </div>
+        </div>
+        <a href="#" data-toggle="modal" data-target="#entryModal" onclick="entryClicked(${person.id})" class="stretched-link"></a>
+        </li>`
+
+
+        $(`#collapse${person.departmentName.replace(/[^a-zA-Z]/g, "")}Search`).append(recordHTML)
+
+
+    })
+    $("#searchResults").show()
+    $("#dashboard").hide()
+    $("#directory").hide()
+
+    
+
+    if ($("#resultList").children().length == 0){
+        noResults()
+    } else {
+        $("#searchModal").modal("hide")
+    }
+}
+
+function noResults(){
+    showAlert()
+    $("#alertText").text("No Results")
+    $("#alertText").addClass("bg-danger")
+    $("#alertText").removeClass("bg-success")
+    $("#alertText").removeClass("bg-warning")
+    $("#dashboard").show()
+    $("#searchResults").hide()
+}
+
+        /*!!!! ENTRY/EDIT !!!!*/
+
+
 function entryClicked(id){
-    
-    $("firstNameShow").removeClass("d-none")
-    $("firstNameInput").addClass("d-none")
-    
     jQuery.ajax({
         type: "POST",
         url: 'php/companydir.php',
@@ -633,6 +850,20 @@ function entryClicked(id){
         error: (er)=>{console.log(er.responseText)}
     })
     
+}
+
+function entryLocationClicked(locationID){
+    
+    obj = {firstName:"",lastName:"",email:"",id:"",department:"",location:locationID,jobTitle:"",locationArray:[""],departmentArray:[""]}
+    console.log(locationID)
+    $('#locationSearch').selectpicker('deselectAll')
+    $("#entryModal").modal("hide")
+    $("#locationSearch").selectpicker("refresh");
+    $("#locationSearch").val(locationID)
+    //$("#searchModal").modal("show")
+
+    console.log($("#locationSearch").val())
+    submitSearch()
 }
 
 //Populates entry with details 
@@ -646,7 +877,7 @@ function displayEntry(person){
     $("#firstNamePen").removeClass("d-none");
     $("#firstNameTick").addClass("d-none");
     $("#firstNameTick").removeAttr("onclick");
-    $("#firstNameTick").attr("onclick",`updateSingleCol(${person.id},"firstName")`);
+    $("#firstNameTickIcon").attr("onclick",`updateSingleCol(${person.id},"firstName")`);
 
     $("#lastNameEntry").text(person.lastName)
     $("#lastNameShow").removeClass("d-none")
@@ -676,19 +907,21 @@ function displayEntry(person){
     $("#emailShow").addClass("d-flex")
     $("#emailInput").val(person.email)
     $("#emailInput").addClass("d-none")
+    $("#emailEntry").attr('href',`mailto:${person.email}`)
 
     $("#emailPen").removeClass("d-none");
     $("#emailTick").addClass("d-none");
     $("#emailTick").removeAttr("onclick");
     $("#emailTick").attr("onclick",`updateSingleCol(${person.id},"email")`);
 
+    
     $("#departmentEntry").text(person.departmentName)
     $("#departmentShow").removeClass("d-none")
     $("#departmentShow").addClass("d-flex")
     $("#departmentInput").val(person.departmentID)
     $("#departmentInput").addClass("d-none")
-    $("#entryDepHead").text(person.departmentHead)
-    $("#entryDepHead").attr('onclick',`entryClicked(${person.departmentHeadID})`)
+    $("#departmentLocation").text(person.locationName)
+    //$("#departmentLocation").attr('onclick',`entryLocationClicked(${person.locationID})`)
     
     $("#departmentPen").removeClass("d-none");
     $("#departmentTick").addClass("d-none");
@@ -718,32 +951,10 @@ function displayEntry(person){
     $("#saveButton").attr("onclick", `saveEntry(${person.id})`)
  
 }
-
-function deleteClicked(id){
-    $("#deleteModal").modal("show")
-    $("#deleteName").text($('#firstNameInput').val())
-    $("#deleteSecondButton").removeAttr("onclick")
-    $("#deleteSecondButton").attr("onclick", `deleteEntry(${id})`)
-}
-
-//Delets entry from ID
-function deleteEntry(id){
-    jQuery.ajax({
-        type: "POST",
-        url: 'php/companydir.php',
-        dataType: 'json',
-        data: {functionname: 'deleteEntry', arguments: [id]},
-        success: (obj)=>{
-            groupByLocation()
-            showAlert()
-            $("#alertText").removeClass("bg-warning")
-            $("#alertText").removeClass("bg-success")
-            $("#alertText").text("Entry Deleted")
-            $("#alertText").addClass("bg-danger")
-
-        },
-        error: (err)=>{console.log(err.responseText)}
-    })
+ 
+function pasteFromClipboard(elem){
+    navigator.clipboard.readText().then(clipText =>
+        document.getElementById(`${elem}Input`).value = clipText);
 }
 
 //Gets all data from edit entry form 
@@ -798,8 +1009,8 @@ function updatePerson(person,id){
         dataType: 'json',
         data: {functionname: 'updateAll', arguments: [person,id]},
         success: (obj)=>{
-            showAlert()
-            groupByLocation();
+            reloadData();
+            showAlert();
             $("#alertText").removeClass("bg-warning")
             $("#alertText").removeClass("bg-danger")
             $("#alertText").addClass("bg-success")
@@ -821,43 +1032,49 @@ function editEntry(elem){
     $(`#${elem}Show`).addClass("d-none")
 }
 
-//Makes unavailable locations unchoosable
-function blurSearchLocations(){
-    departmentID = $("#departmentSearch").val()
-    if (departmentID ==""){
-        options = $("#locationSearch").children()
-        for (i=0;i<options.length;i++){
-            options[i].removeAttribute("disabled")
-    }
-    return;
-    }
+function addJobTitle(title){
     jQuery.ajax({
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'getLocationIDFromDepartment', arguments: [departmentID]},
-        success: (obj)=>{
-            options = $("#locationSearch").children()
-            for (i=0;i<options.length;i++){
-                if (obj.value === ""){
-                    options[i].removeAttribute("disabled")
-                    continue;
-                }
-                if (options[i].value == obj){
-                    options[i].removeAttribute("disabled")
-                } else {
-                    options[i].setAttribute("disabled","true")
-                }
-                
-
-            }
+        data: {functionname: 'updateJSON', arguments: [title]},
+        success: (obje)=>{
         }
     })
+}
 
+function deleteClicked(id){
+    $("#deleteModal").modal("show")
+    $("#deleteName").text($('#firstNameInput').val())
+    $("#deleteSecondButton").removeAttr("onclick")
+    $("#deleteSecondButton").attr("onclick", `deleteEntry(${id})`)
+}
+
+//Delets entry from ID
+function deleteEntry(id){
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: 'deleteEntry', arguments: [id]},
+        success: (obj)=>{
+            groupByLocation()
+            showAlert()
+            $("#alertText").removeClass("bg-warning")
+            $("#alertText").removeClass("bg-success")
+            $("#alertText").text("Entry Deleted")
+            $("#alertText").addClass("bg-danger")
+
+        },
+        error: (err)=>{console.log(err.responseText)}
+    })
 }
 
 //Updates one column on record 
 function updateSingleCol(id, elem){
+    if (elem == "jobTitle"){
+        addJobTitle($(`#jobTitleInput`).val())
+    }
     if (elem=="departmentID"){
         val = $(`#departmentInput`).val()
     } else {
@@ -888,7 +1105,6 @@ function updateSingleCol(id, elem){
                 if (elem == "id"){
                 $("#saveButton").removeAttr("onclick")
                 $("#saveButton").attr("onclick",`saveEntry(${val})`)
-                
                 }
 
                 if (elem =="departmentID"){
@@ -897,20 +1113,24 @@ function updateSingleCol(id, elem){
                         type: "POST",
                         url: 'php/companydir.php',
                         dataType: 'json',
-                        data: {functionname: 'getDepHeadName', arguments: [val]},
+                        data: {functionname: 'getLocationIDAndNameFromDepartment', arguments: [val]},
                         success: (obj)=>{
-                            $(`#entryDepHead`).text(obj[0])
-                            $(`#entryDepHead`).removeAttr("onclick")
-                            $(`#entryDepHead`).attr("onclick",`entryClicked(${obj[1]})`)
+                            $(`#departmentLocation`).text(obj.locationName)
+                            $(`#departmentLocation`).removeAttr("onclick")
+                            $(`#departmentLocation`).attr("onclick",`entryLocationClicked(${obj.locationID})`)
                         }, error: (er)=>{console.log(er.responseText)}
                     })
                 }
+
                 if (elem =="department"){
                     $(`#${elem}Entry`).text($(`#${elem}Input :selected`).text())
                 } else {
                     $(`#${elem}Entry`).text($(`#${elem}Input`).val())
                 }
-                $(`#${elem}Show`).removeClass("d-none")
+
+                reloadData();
+
+            $(`#${elem}Show`).removeClass("d-none")
             $(`#${elem}Show`).addClass("d-flex")
             $(`#${elem}Pen`).removeClass("d-none")
             $(`#${elem}Tick`).addClass("d-none")
@@ -928,125 +1148,25 @@ function updateSingleCol(id, elem){
     })
 }
 
-
-//Show search reuslts and populate with list 
-function showResults(res){
-    //clearSearch()
-    $("#entry").hide()
+    /*!!!! CREATE !!!!*/
     
+//Clears create form
+function clearCreate(){
+    $('#createForm').trigger("reset");
+    $('#firstNameCreate').removeClass("border-danger")
+    $('#firstNameCreate').removeClass("border-success")
 
-    $("#search").hide()
-    $("#searchResults").show()
+    $('#lastNameCreate').removeClass("border-danger")
+    $('#lastNameCreate').removeClass("border-success")
+    
+    $('#emailCreate').removeClass("border-danger")
+    $('#emailCreate').removeClass("border-success")
 
-    i=0;
-    res.forEach(function(record){
-        if (i%2==0){
-            recordHTML = `<li class="list-group-item bg-light h-10">`
-        } else {
-            recordHTML = `<li class="list-group-item bg-grey h-10">`
-        }
-        recordHTML += `
-        <h4>${record.firstName} ${record.lastName}</h4>
-        <h5>${record.email}</h5>
-        <div class="row">
-            <div class="col">
-                ID:${record.id}
-            </div>
-            <div class="col">
-            ${record.jobTitle}
-            </div>
-      </div>
-      <div class="row">
-        <div class="col">
-                ${record.locationName}
-            </div>
-            <div class="col">
-             ${record.departmentName} (<i>${record.departmentHead}</i>)
-            </div>
-        </div>
-        <a href="#" data-toggle="modal" data-target="#entryModal" onclick="entryClicked(${record.id})" class="stretched-link"></a>
-        </li>`
-
-
-
-        $("#resultList").append(recordHTML)
-        i++;
-    })
-}
-
-//Fills the location options from database
-function fillLocations(){
-    $("locationSearch").empty()
-    $("locationCreate").empty()
-    jQuery.ajax({
-        type: "POST",
-        url: 'php/companydir.php',
-        dataType: 'json',
-        data: {functionname: 'getLocations'},
-        success: (obje)=>{
-            obje.forEach(function(location){
-                option = document.createElement("option") 
-                option.value = location.id;
-                option.text = location.name;
-                $('#locationSearch').append(option)
-
-                
-                option1 = document.createElement("option") 
-                option1.value = location.id;
-                option1.text = location.name;
-                $('#locationCreate').append(option)
-            })
-        },
-        error: (er)=>{console.log(er)}
-        
-    })
-}
-
-//Fills the department options from database
-function fillDepartments(){
-    $('#departmentSearch').empty()
-    $('#departmentInput').empty()
-    $('#departmentCreate').empty()
-
-    emptyOption = '<option value="" selected>Please select</option>'
-    $('#departmentSearch').append(emptyOption)
-    $('#departmentInput').append(emptyOption)
-    $('#departmentCreate').append(emptyOption)
-
-    jQuery.ajax({
-        type: "POST",
-        url: 'php/companydir.php',
-        dataType: 'json',
-        data: {functionname: 'getDepartments'},
-        success: (obje)=>{
-            obje.forEach(function(department){
-                option = document.createElement("option")
-                option.value = department.id;
-                option.text = department.name;
-                $('#departmentSearch').append(option)
-
-                option2 = document.createElement("option")
-                option2.value = department.id;
-                option2.text = department.name;
-                $('#departmentCreate').append(option2)
-
-                option3 = document.createElement("option")
-                option3.value = department.id;
-                option3.text = department.name;
-                $('#departmentInput').append(option3)
-
-
-
-                
-                
-
-                
-
-            })
-        },
-        error: (er)=>{console.log(er.responseText)}
-        
-    })
+    $('#jobTitleCreate').removeClass("border-danger")
+    $('#jobTitleCreate').removeClass("border-success")
+    
+    $('#idCreate').removeClass("border-danger")
+    $('#idCreate').removeClass("border-success")
 }
 
 //Checks if email is valid and changes border 
@@ -1073,80 +1193,6 @@ function checkEmpty(elem){
     } else {
         elem.classList.add("border-success")
     }
-}
-
-//Submits create form, checks for valid values
-function submitCreate(){
-    emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
-    obj = {};
-    obj.id = $("#idCreate").val()
-    obj.firstName = $("#firstNameCreate").val()
-    obj.lastName = $("#lastNameCreate").val()
-    obj.email = $("#emailCreate").val()
-    obj.departmentID = $("#departmentCreate").val()
-    obj.departmentName = $("#departmentCreate option:selected").text()
-    obj.jobTitle = $("#jobTitleCreate").val()
-    errArr=[]
-    if (obj.firstName==""){
-        errArr.push("Must Enter First Name")
-        $("#firstNameCreate").addClass("border-danger")
-        $("#firstNameCreate").removeClass("border-success")
-    }
-    if (obj.lastName==""){
-        errArr.push("Must Enter Last Name")
-        $("#lastNameCreate").addClass("border-danger")
-        $("#lastNameCreate").removeClass("border-success")
-    } 
-    if (obj.email=="" || (emailRegex.test(obj.email) == false)){
-        errArr.push("Must enter valid email")
-        $("#emailCreate").addClass("border-danger")
-        $("#emailCreate").removeClass("border-success")
-    } 
-    if (obj.departmentID == ""){
-        errArr.push("Must choose a department")
-        $("#departmentCreate").addClass("border-danger")
-        $("#departmentCreate").removeClass("border-success")
-    } 
-
-
-    if(errArr.length > 0){
-        $("#alertText").text(errArr.join(" / "))
-        $("#alertText").addClass("bg-warning")
-        showAlert()
-        return
-    }
-
-    $("#backButton").removeAttr("onclick")
-    $("#backButton").attr("onclick", "createClicked()")
-    jQuery.ajax({
-        type: "POST",
-        url: 'php/companydir.php',
-        dataType: 'json',
-        data: {functionname: 'create', arguments: [obj]},
-        success: (obj)=>{
-            if (obj != "ID or Email already in use"){
-            displayEntry(obj)
-            showAlert()
-            groupByLocation()
-            $("#alertText").text("Entry Created")
-            $("#alertText").removeClass("bg-warning")
-            $("#alertText").removeClass("bg-danger")
-            $("#alertText").addClass("bg-success")
-            $("#createModal").modal('hide')
-            } else {            
-                showAlert()
-                $("#alertText").text("ID already in use")
-                $("#alertText").removeClass("bg-success")
-                $("#alertText").removeClass("bg-danger")
-                $("#alertText").addClass("bg-warning")
-                    
-                $("#createModal").modal('show')
-            }
-        },
-        error: (er)=>{console.log(er.responseText)}
-        
-    })
-
 }
 
 //Checks for valid ID (if it exists in search/if it doesn't in create)
@@ -1194,21 +1240,179 @@ function checkID(elem){
     
 }
 
-//Fills ID with valid number from database
-function fillID(loc){
+function createDepartmentClicked(){
+    hideSidebar()
+    $("#departmentCreateForm").trigger('reset')
+    $("#createModalLabel").text("Department")
+    $("#departmentCreateForm").removeClass("d-none")
+    $("#personCreateForm").addClass("d-none")
+    $("#locationCreateForm").addClass("d-none")
+    $("#createButton").removeAttr("onclick")
+    $("#createButton").attr("onclick", "createDepartment()")
+}
+
+function createLocationClicked(){
+    hideSidebar()
+    $("#locationCreateForm").trigger('reset')
+    $("#createModalLabel").text("Location")
+    $("#departmentCreateForm").addClass("d-none")
+    $("#personCreateForm").addClass("d-none")
+    $("#locationCreateForm").removeClass("d-none")
+    $("#createButton").removeAttr("onclick")
+    $("#createButton").attr("onclick", "createLocation()")
+
+}
+
+function createPersonClicked(){
+    groupByLocation()
+    hideSidebar()
+    $("#personCreateForm").trigger('reset')
+    $("#createModalLabel").text("Person")
+    $("#departmentCreateForm").addClass("d-none")
+    $("#locationCreateForm").addClass("d-none")
+    $("#personCreateForm").removeClass("d-none")
+    $("#createButton").removeAttr("onclick")
+    $("#createButton").attr("onclick", "submitCreate()")
+
+}
+
+function createDepartment(){
+    departmentName = $("#departmentInputCreate").val();
+    departmentName = departmentName.replace("'","''")
+    locationid = $("#locationCreate").val()
+
     jQuery.ajax({
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'getAvailableIDs'},
-        success: (obje)=>{
-            ranNum = Math.floor(Math.random()*10)
-            $(`#id${loc}`).val(obje[ranNum])
-            $(`#id${loc}`).removeClass("border-danger")
-            $(`#id${loc}`).addClass("border-success")
+        data: {functionname: 'addDepartment', arguments:[departmentName,locationid]},
+        success: (obj)=>{
+            if(obj == true){
+                showAlert()
+                reloadData()
+                $("#alertText").text("Department Successfully Added")
+                $("#alertText").removeClass("bg-danger")
+                $("#alertText").removeClass("bg-warning")
+                $("#alertText").addClass("bg-success")
+                $("#createModal").modal('hide')
+            } else {
+                showAlert()
+                $("#alertText").text("Department Already Exists")
+                $("#alertText").removeClass("bg-danger")
+                $("#alertText").addClass("bg-warning")
+                $("#alertText").removeClass("bg-success")
+                $("#createModal").modal('show')
+            }
         },
-        error: (err)=>{console.log(err.responseText)}
+        error: (er)=>{console.log(er.responseText)}
+        
     })
 
-    
+}
+
+function createLocation(){
+    locationName = $("#locationInputCreate").val();
+    locationName = locationName.replace("'","''")
+        jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: 'addLocation', arguments:[locationName]},
+        success: (obj)=>{
+            if(obj == true){    
+                reloadData()
+                showAlert()
+                $("#alertText").text("Location Successfully Added")
+                $("#alertText").removeClass("bg-danger")
+                $("#alertText").removeClass("bg-warning")
+                $("#alertText").addClass("bg-success")
+                $("#createModal").modal('hide')
+            } else {
+                showAlert()
+                $("#alertText").text("Location Already Exists")
+                $("#alertText").removeClass("bg-danger")
+                $("#alertText").addClass("bg-warning")
+                $("#alertText").removeClass("bg-success")
+                $("#createModal").modal('show')
+            }
+        },
+        error: (er)=>{console.log(er.responseText)}
+        
+    })
+
+}
+
+//Submits create form, checks for valid values
+function submitCreate(){
+    emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+    obj = {};
+    obj.id = $("#idCreate").val()
+    obj.firstName = $("#firstNameCreate").val().replace("'","''")
+    obj.lastName = $("#lastNameCreate").val().replace("'","''")
+    obj.email = $("#emailCreate").val()
+    obj.departmentID = $("#departmentCreate").val()
+    obj.departmentName = $("#departmentCreate option:selected").text()
+    obj.jobTitle = $("#jobTitleCreate").val().replace("'","''")
+    errArr=[]
+    if (obj.firstName==""){
+        errArr.push("Must Enter First Name")
+        $("#firstNameCreate").addClass("border-danger")
+        $("#firstNameCreate").removeClass("border-success")
+    }
+    if (obj.lastName==""){
+        errArr.push("Must Enter Last Name")
+        $("#lastNameCreate").addClass("border-danger")
+        $("#lastNameCreate").removeClass("border-success")
+    } 
+    if (obj.email=="" || (emailRegex.test(obj.email) == false)){
+        errArr.push("Must enter valid email")
+        $("#emailCreate").addClass("border-danger")
+        $("#emailCreate").removeClass("border-success")
+    } 
+    if (obj.departmentID == ""){
+        errArr.push("Must choose a department")
+        $("#departmentCreate").addClass("border-danger")
+        $("#departmentCreate").removeClass("border-success")
+    } 
+
+
+    if(errArr.length > 0){
+        $("#alertText").text(errArr.join(" / "))
+        $("#alertText").addClass("bg-warning")
+        showAlert()
+        return
+    }
+
+    jQuery.ajax({
+        type: "POST",
+        url: 'php/companydir.php',
+        dataType: 'json',
+        data: {functionname: 'create', arguments: [obj]},
+        success: (obj)=>{
+            if (obj != "ID or Email already in use"){
+                
+            $("#createModal").modal('hide')
+            //displayEntry(obj)
+            showAlert()
+            reloadData()
+            
+
+            $("#alertText").text("Entry Created")
+            $("#alertText").removeClass("bg-warning")
+            $("#alertText").removeClass("bg-danger")
+            $("#alertText").addClass("bg-success")
+            } else {            
+                showAlert()
+                $("#alertText").text("ID already in use")
+                $("#alertText").removeClass("bg-success")
+                $("#alertText").removeClass("bg-danger")
+                $("#alertText").addClass("bg-warning")
+                    
+                $("#createModal").modal('show')
+            }
+        },
+        error: (er)=>{console.log(er.responseText)}
+        
+    })
+
 }

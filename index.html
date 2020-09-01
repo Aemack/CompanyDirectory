@@ -32,55 +32,70 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
         
         
-        
-        
         <!--My Styles-->
+        <link href="css/customBootstrap.css" rel="stylesheet">
         <link href="css/main.css" rel="stylesheet">
         <script src="js/app.js"></script>
       </head>
       <body class="bg-dark">
+
+
+<div id="sidebar" class="sidebar-container">
+  <ul class="sidebar-list"> 
+
+    <li class="sidebar-list-item"><a href="#" onclick="dashboardClicked()" class="sidebar-link"><h6 class="sidebar-list-text">Dashboard</h6><i class="sidebar-icon fas fa-tachometer-alt fa-2x"></i></a></li>
+    
+    <li class="sidebar-list-item"><a href="#" onclick="directoryClicked()" class="sidebar-link"><h6 class="sidebar-list-text">Directory</h6><i class="sidebar-icon fas fa-address-book fa-2x"></i></a></li>
+    <li class="sidebar-list-item"><a href="#" onclick="searchClicked()" class="sidebar-link"><h6 class="sidebar-list-text">Search</h6><i class="sidebar-icon fas fa-search fa-2x"></i></a></li>
+    <li class="nav-item dropdown" id="createTab">
+      <a class="text-light" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <h6>Create</h6><i class="sidebar-icon fas fa-plus fa-2x"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+        <a class="dropdown-item" data-toggle="modal" data-target="#createModal" onclick="createPersonClicked()" href="#">Person</a>
+        <a class="dropdown-item" data-toggle="modal" data-target="#createModal" onclick="createDepartmentClicked()" href="#">Department</a>
+        <a class="dropdown-item" data-toggle="modal" data-target="#createModal" onclick="createLocationClicked()" href="#">Location</a>
+      </div>
+    </li>             
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
         <!--Navbar/Header-->
-        <nav class="navbar navbar-expand navbar-dark bg-dark">
-          <img src="img/cd.png" style="width:40px;" class="img-rounded d-none d-sm-block m-1">
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample02" aria-controls="navbarsExample02" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-    
-          <div class="collapse navbar-collapse" id="navbarsExample02">
-            <ul class="nav nav-tabs mr-auto">
-              <li class="nav-item">
-                <a id="directoryTab" class="nav-link active border-light" onclick="directoryClicked()" href="#">Directory<span id="directoryTabCheck" class="sr-only">(current)</span></a>
-              </li>
-              <li class="nav-item active">
-                <a id="searchTab" class="nav-link text-light border-light" onclick="searchClicked()" href="#">Search<span id="searchTabCheck" class="sr-only"></span></a>
-              </li>
-              <li class="nav-item dropdown" id="createTab">
-                <a class="nav-link border-light dropdown-toggle  text-light" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Create
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                  <a class="dropdown-item" data-toggle="modal" data-target="#createModal" onclick="createPersonClicked()" href="#">Person</a>
-                  <a class="dropdown-item" data-toggle="modal" data-target="#createModal" onclick="createDepartmentClicked()" href="#">Department</a>
-                  <a class="dropdown-item" data-toggle="modal" data-target="#createModal" onclick="createLocationClicked()" href="#">Location</a>
-                </div>
-              </li>             
-            </ul>
-            <li class="nav-item dropdown d-flex justify-content-center align-items-center">
-              <a class="nav-link border-light dropdown-toggle  text-light" href="#" id="loginOptions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-user-alt"></i>
-              </a>
-              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="loginOptions">
-                <a class="dropdown-item" data-toggle="modal" data-target="#logoutModal" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
-              </div>
-            </li>   
-
+        <ul id="navbar" class="nav bg-primary sticky-top h-10">
+          <li class=""><button  class="btn text-light"><i id="menuButton" class="fas fa-bars fa-2x"></i></button></li>
+          
+          <li class="">
+            <img src="img/android-chrome-192x192.png" id="navLogo">
+            <h2 id="navText" class="text-light text-bold my-auto"><img style="width:30px;" src="img/C/apple-touch-icon.png" >ompany <img style="width:30px;" src="img/d/apple-touch-icon.png" >irectory</h2>
+          </li>
+          <li class="nav-item dropdown d-flex justify-content-center align-items-center">
+            <button class="border-none btn border-light dropdown-toggle  text-light"  id="loginOptions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-user-alt"></i>
+            </button>
+            <div id="logoutDropdown" class="dropdown-menu dropdown-menu-right" aria-labelledby="loginOptions">
+              <a class="dropdown-item"><i class="fas fa-user-alt"></i><span> User: <span id="usernameDisplay"></span></span></a>
+              <a class="dropdown-item" data-toggle="modal" data-target="#logoutModal" href="#"><i class="fas fa-sign-out-alt"></i>  Logout</a>
             </div>
-          </div>
-        </nav>
+          </li>   
+        </ul>
 
 
 
+        
         <!--Dropdown warning-->
         <div id="collapseAlert" class="collapse sticky-top text-center position-absolute w-100">
           <div><h6 id="alertText" class="rounded-bottom border-bottom border-dark p-1"></h6><a href="#" class="stretched-link" onmouseover="hideAlert()"></a></div>
@@ -88,7 +103,7 @@
 
 
 
-        <div id="openPage"> 
+        <div class="" id="openPage"> 
           <!--Sign In-->
           <div id="signIn">
           <div class="container h-100">
@@ -96,7 +111,7 @@
               <div class="user_card">
                 <div class="d-flex justify-content-center">
                   <div class="brand_logo_container m-2">
-                    <img src="img/cd.png" alt="Logo">
+                    <img class="openPageImage" src="img/cd.png" alt="Logo">
                   </div>
                 </div>
                 <div class="d-flex justify-content-center form_container">
@@ -129,14 +144,97 @@
         </div>
 
   
-    <div class="my-auto position-relative" id="main">
-      <div id="directory">
-        <select id="groupBySelect" class="custom-select my-2 mr-sm-2" onchange="groupByChanged(this)">
-        <option value="locations">Locations</option>
-        <option value="departments">Departments</option>
-        <option value="none">None</option>
-      </select>
-        <ul id="directoryList" class="list-group bg-light"></ul>
+        <!--Main-->
+    <div class="my-auto position-relative bg-dark" id="main">
+
+
+
+      <!--Dashboard-->
+
+      <div id="dashboard">
+      <div id="" class="container d-flex justify-content-around flex-row">
+        
+        <div id="locationsCard" class="card dashboard-card">
+          
+          <div class="card-body dashboard-card-body">
+            <div class="justify-content-center align-items-center d-flex flex-column">
+              <button class="btn" data-target="#dashboardLocationsCollapse" data-toggle="collapse">
+              <i class="fas fa-globe-asia fa-3x"></i>
+              <h6 class="text-center">Locations<br><span id="locationCardDisplay"></span></h6>
+              </button>
+            </div>
+          </div>
+
+          <div class="card-footer dashboard-card-footer">
+            <div class="collapse" id="dashboardLocationsCollapse">
+              <p class="text-center"><b>Locations</b></p>
+              <div id="dashboardLocationsList" class="dashboard-list">
+
+              
+            </div>
+            </div>
+        </div>
+      </div>
+
+        <div id="departmentsCard" class="card dashboard-card">
+          <div class="card-body dashboard-card-body">
+            <div class="justify-content-center align-items-center d-flex flex-column">
+              <button class="btn" data-target="#dashboardDepartmentsCollapse" data-toggle="collapse">
+                <i class="fas fa-building fa-3x"></i>
+                <h6 class="text-center">Departments<br><span id="departmentCardDisplay"></span></h6>
+              </button>
+            </div>
+            
+          </div>
+          <div class="card-footer dashboard-card-footer">
+            <div class="collapse" id="dashboardDepartmentsCollapse">
+              <p class="text-center"><b>Departments</b></p>
+              <div id="dashboardDepartmentsList" class="dashboard-list">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="personnelCard" class="card dashboard-card">
+          <div class="card-body dashboard-card-body">
+            <div class="justify-content-center align-items-center d-flex flex-column">
+              <button class="btn" data-target="#dashboardPersonnelCollapse" data-toggle="collapse">
+                <i class="fas fa-users fa-3x"></i>
+                <h6 class="text-center">Personnel<br><span id="personnelCardDisplay"></span></h6>
+              </button>
+              </div>   
+         
+          </div>
+          <div class="card-footer dashboard-card-footer">
+            <div class="collapse" id="dashboardPersonnelCollapse">
+              <p class="text-center"><b>Department Heads</b></p>
+            <div id="dashboardPersonnelList" class="dashboard-list">
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+      </div></div>
+
+
+
+
+
+
+
+
+      <!--Directory-->
+      <div id="directory" style="display:none" class="bg-light p-2">
+        <div class="input-group justify-content-center align-items-center">
+          <div class="input-group-label"><span >Group By:</span></div>
+          <select id="groupBySelect" class="selectpicker"  onchange="groupByChanged(this)">    
+            <option value="locations">Locations</option>
+            <option value="departments">Departments</option>
+            <option value="none">None</option>
+          </select>
+      </div>
+        <ul id="directoryList"  class="list-group bg-light"></ul>
       </div>
       
 
@@ -146,7 +244,7 @@
         
 <!---Search Results-->
 
-        <div id="searchResults" style="display: none;">
+        <div id="searchResults" class="bg-dark" style="display: none;">
 
           <ul id="resultList" class="list-group">
 
@@ -156,11 +254,39 @@
 
 
 
-      <!--Search-->
-      <div id="search" style="display: none;" class="container">
-          <div id="searchFormContainer">
-          <form class="bm-0" onsubmit="return false" id="searchForm"  role="form">
-              <h3>Search</h3>
+
+
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+<!--Modals-->
+
+
+
+<!--Search Modal-->
+<div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Search</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <button  type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="search" class="container h-100">
+          <div id="searchFormContainer" class="h-auto">
+          <form class="" onsubmit="return false" id="searchForm"  role="form">
               <div class="form-group row">
                   <label for="firstName" class="col-3 my-auto text-center">First Name</label>
                   <div class="col-9 my-auto">
@@ -194,13 +320,13 @@
               <div class="form-group row">
                   <label for="departmentSearch" class="col-3 my-auto text-center">Department</label>
                   <div class="col-9">
-                      <select id="departmentSearch" onchange="blurSearchLocations()" class="form-control"><option value="" selected>Please select</option></select>
+                      <select id="departmentSearch" title="Leave blank to search all..." data-actions-box="true" multiple ></select>
                   </div>
               </div>
               <div class="form-group row">
                   <label for="locationSearch" class="col-3 my-auto text-center">Location</label>
                   <div class="col-9">
-                    <select id="locationSearch" class="form-control"><option value="" selected>Please select</option></select>
+                    <select id="locationSearch" title="Leave blank to search all..." multiple data-actions-box="true" ></select>
                   </div>
               </div>
 
@@ -210,7 +336,21 @@
       </div> 
 
 
-<!--Modals-->
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
         <!--Delete Modal-->
         <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -223,7 +363,7 @@
                   </button>
                 </div>
                 <div class="modal-body">
-                  <h6>You want to remove <span id="deleteName"></span> from the database?</h6>
+                  <h4>You want to remove <span id="deleteName"></span> from the database?</h4>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -245,9 +385,6 @@
                     <button  type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                   </button>
-                </div>
-                <div class="modal-body">
-                  <h6>Logout?</h6>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -382,32 +519,36 @@
                 <div id="entryFormContainer">
                   <form onsubmit="return false" id="entryForm"  role="form">
                     
-                    <div class="form-group row my-auto p-2">
+                    <div class="form-group row">
                         <label for="firstNameInput" class="col-3 my-auto">First Name</label>
-                        <div class="col-6 my-auto ">
-                            <div id="firstNameShow" class="d-flex"><h6 class="my-auto" id="firstNameEntry"></h6></div>
+                        <div class="col-7 my-auto ">
+                            <div id="firstNameShow" class="d-flex"><p class="my-auto" id="firstNameEntry"></p></div>
                             <input type="text" id="firstNameInput" placeholder="First Name" class="form-control d-none" autofocus>
                         </div>
-                        <div class="col-3">
-                          <a id="firstNamePen" onclick="editEntry('firstName')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a>
-                          <a id="firstNameTick" class="d-none"  href="#"><i class="p-1 fas fa-check-circle"></i></a>
+                        <div class="col">
+                            <a id="firstNamePen" onclick="editEntry('firstName')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a>
+                            
+                            <div class="d-none" id="firstNameTick">
+                              <a onclick="pasteFromClipboard('firstName')" href="#" class=""><i class="fas fa-paste"></i></a>
+                              <a id="firstNameTickIcon"  href="#"><i class="p-1 fas fa-check-circle"></i></a>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group row my-auto p-2">
+                    <div class="form-group row">
                         <label for="lastNameInput" class="col-3 my-auto">Last Name</label>
-                        <div class="col-6 my-auto">
-                          <div class="d-flex" id="lastNameShow"><h6 class="my-auto" id="lastNameEntry"></h6></div>
+                        <div class="col-7 my-auto">
+                          <div class="d-flex" id="lastNameShow"><p class="my-auto" id="lastNameEntry"></p></div>
                             <input type="text"  id="lastNameInput" placeholder="Last Name" class="form-control d-none" autofocus>
                         </div>
-                        <div class="col-3">
+                        <div class="col">
                           <a id="lastNamePen" onclick="editEntry('lastName')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a>
                           <a id="lastNameTick" class="d-none"  href="#"><i class="p-1 fas fa-check-circle"></i></a>
                         </div>
                     </div>
-                    <div class="form-group row my-auto p-2">
+                    <div class="form-group row ">
                         <label for="idInput" class="col-3 my-auto">ID Number</label>
-                        <div class="col-6 my-auto">
-                          <div class="d-flex" id="idShow"><h6 class="my-auto" id="idEntry"></h6></div>
+                        <div class="col-7 my-auto">
+                          <div class="d-flex" id="idShow"><p class="my-auto" id="idEntry"></p></div>
                           <div class="input-group">
                           <input type="number"  min="1" step="1" onblur="checkID(this)" oninput="checkID(this)" id="idInput" placeholder="ID Number" autofocus class="form-control d-none">
                           <div id="idGenInput" class="input-group-append d-none">
@@ -415,43 +556,46 @@
                             </div>  
                         </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col">
                           <a id="idPen" onclick="editEntry('id')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a>
                           <a id="idTick" class="d-none"  href="#"><i class="p-1 fas fa-check-circle"></i></a>
                         </div>
                     </div>
-                    <div class="form-group row my-auto p-2">
+                    <div class="form-group row ">
                         <label for="emailInput" class="col-3 my-auto">Email </label>
-                        <div class="col-6 my-auto">
-                          <div class="d-flex" id="emailShow"><h6 class="my-auto" id="emailEntry"></h6></div>
+                        <div class="col-7 my-auto">
+                          <div class="d-flex" id="emailShow"><a class="my-auto" id="emailEntry"></a></div>
                             <input type="email" id="emailInput" placeholder="Email" class="form-control d-none" name= "emailSearch">
                         </div>
-                        <div class="col-3">
+                        <div class="col">
                           <a id="emailPen" onclick="editEntry('email')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a>
                           <a id="emailTick" class="d-none"  href="#"><i class="p-1 fas fa-check-circle"></i></a>
                         </div>
                     </div>
-                    <div class="form-group row my-auto p-2">
+                    <div class="form-group row">
                       <label for="jobTitleInput" class="col-3 my-auto">Job Title</label>
-                  <div class="col-6 my-auto">
-                    <div class="d-flex" id="jobTitleShow"><h6 class="text-center my-auto" id="jobTitleEntry"></h6></div>
+                  <div class="col-7 my-auto">
+                    <div class="" id="jobTitleShow"><p class="text-center my-auto" id="jobTitleEntry"></p></div>
                       <input type="text" id="jobTitleInput" placeholder="Job Title" autocomplete="off" class="form-control basicAutoComplete d-none">
                   </div>
-                  <div class="col-3">
+                  <div class="col">
                     <a id="jobTitlePen" onclick="editEntry('jobTitle')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a>
                     <a id="jobTitleTick" class="d-none"  href="#"><i class="p-1 fas fa-check-circle"></i></a>
                   </div>
               </div>
-                    <div class="form-group row my-auto p-2">
-                        <label for="departmentInput" class="col-3 my-auto">Department</label>
-                        <div class="col-6 my-auto">
-                          <div class="d-flex justify-content-around" id="departmentShow"><h6 class="text-center col my-auto"><span id="departmentEntry"></span></h6><br><p class="text-center col my-auto"><a id="entryDepHead" href="#"></a></p> </div>
-                            <select id="departmentInput" class="form-control"><option value="" selected>Please select</option></select>
-                        </div>
-                        <div class="col-3">
-                          <a id="departmentPen" onclick="editEntry('department')" href="#"><i class="p-1 fas fa-pencil-alt"></i></a>
-                          <a id="departmentTick" class="d-none"  href="#"><i class="p-1 fas fa-check-circle"></i></a></div>
-                    </div>
+
+
+              <div class="form-group row ">
+                <label for="departmentInput" class="col-3 my-auto">Department</label>
+                <div class="col-7 my-auto">
+                  <div class="d-flex justify-content-around" id="departmentShow"><p class="text-center my-auto"><span id="departmentEntry"></span></p><p class="text-center my-auto"><p class="my-auto" id="departmentLocation" href="#"></p></p> </div>
+                    <select id="departmentInput" class="form-control"><option value="" selected="">Please select</option></select>
+                </div>
+                <div class="col">
+                  <a id="departmentPen" onclick="editEntry('department')" href="#"><i class="p-1 fas fa-pencil-alt" aria-hidden="true"></i></a>
+                  <a id="departmentTick" class="d-none" href="#"><i class="p-1 fas fa-check-circle" aria-hidden="true"></i></a></div>
+            </div>
+
                   </form> <!-- /form -->
               </div>
                 

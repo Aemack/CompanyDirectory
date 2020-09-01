@@ -83,6 +83,13 @@ function getPersonByID($id){
 
 }
 
+function getLocationIDAndNameFromDepartment($departmentId){
+    $result["locationID"] = getLocationIDFromDepartment($departmentId);
+    $result["locationName"] = getLocationFromDepartment($departmentId);
+
+    return $result;
+}
+
 function getJobTitles(){
     global $dbName, $dbUser, $dbHost, $dbPass;
     $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
@@ -139,17 +146,14 @@ function getDepartments(){
 }
 
 //Updates department JSON file from database 
-function updateJSON($result){
-    $jsonString = file_get_contents('departments.json');
+function updateJSON($title){
+    $jsonString = file_get_contents('../jobTitles.json');
     $data = json_decode($jsonString, true);
     $i=0;
     // or if you want to change all entries with activity_code "1"
-    foreach ($result as $department){
-        $data[$i] =$department["name"];
-        $i++;
-    }
+    array_push($data,$title);
     $newJsonString = json_encode($data);
-    file_put_contents('departments.json', $newJsonString);
+    file_put_contents('../jobTitles.json', $newJsonString);
 }
 
 // Gets departments available in location 
@@ -201,6 +205,33 @@ function getLocationIDFromDepartment($departmentID){
     return $row["locationID"];
 }
 
+function getAllDepartmentInfo($depName){
+    
+    global $dbName, $dbUser, $dbHost, $dbPass;
+    $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+
+    $sql = "SELECT location.id, location.name, department.name AS depName 
+    FROM companydirectory.department
+    LEFT JOIN companydirectory.location
+    ON department.locationID=location.id
+    WHERE department.name='$depName'";
+
+
+    
+    $res = mysqli_query($conn, $sql);
+    $row = $res->fetch_assoc();
+
+    $result = $row;
+
+    return $result;
+
+}
+
+function getLocationNameAndIdFromDepartment($departmentID){
+    $location["name"] = getLocationFromDepartment($departmentID);
+    $location["id"] = getLocationIDFromDepartment($departmentID);
+    return $location;
+}
 
 function getDepartmentNamesAndIdsFromLocation($location){
     $departments = getDepartmentsFromLocation($location);
@@ -555,10 +586,20 @@ function addLocation($name){
     
     $res = mysqli_query($conn, $sql);
 
-    if(mysqli_num_rows($res)==0){
+    if ($res){
+        if(mysqli_num_rows($res)==0 ){
+            $sql="INSERT INTO location (name) VALUES ('$name')";    
+            $res = mysqli_query($conn, $sql);
+            return true;
+        }
+
+    } else {
+        
         $sql="INSERT INTO location (name) VALUES ('$name')";    
         $res = mysqli_query($conn, $sql);
-        return true;
+        if ($res){
+            return true;
+        }
     }
     return false ;
     
@@ -608,8 +649,89 @@ function verifyLogin($username, $password){
 
 }
 
+function getLocationCount(){
+    global $dbName, $dbUser, $dbHost, $dbPass;
+    $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+
+    $sql = "SELECT COUNT(*) AS locations FROM location";
+
+    $res = mysqli_query($conn, $sql);
+
+    $row = $res->fetch_assoc();
+    return $row["locations"];
+}
+
+function getDepartmentCount(){
+    global $dbName, $dbUser, $dbHost, $dbPass;
+    $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+
+    $sql = "SELECT COUNT(*) AS departments FROM department";
+
+    $res = mysqli_query($conn, $sql);
+
+    $row = $res->fetch_assoc();
+    return $row["departments"];
+}
+
+function getPersonnelCount(){
+    global $dbName, $dbUser, $dbHost, $dbPass;
+    $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+
+    $sql = "SELECT COUNT(*) AS personnel FROM personnel";
+
+    $res = mysqli_query($conn, $sql);
+
+    $row = $res->fetch_assoc();
+    return $row["personnel"];
+}
+
+function getDepHeads(){
+    global $dbName, $dbUser, $dbHost, $dbPass;
+    $conn = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+    $sql="SELECT * FROM personnel WHERE jobTitle='Department Head'";
+    
+    $res = mysqli_query($conn, $sql);
+    $i=0;
+        while($row = $res->fetch_assoc()) {
+          $result[$i]["departmentID"] = $row["departmentID"];
+          $result[$i]["firstName"] = $row["firstName"];
+          $result[$i]["lastName"] = $row["lastName"];
+          $result[$i]["id"] = $row["id"];
+          $i++;
+        }
+
+    return $result;
+
+    
+}
+
+
+function getDashboardData(){
+    $result["departments"] = getDepartments();
+    $result["locations"] = getLocations();
+    $result["location"] = getLocationCount();
+    $result["department"] = getDepartmentCount();
+    $result["personnel"] = getPersonnelCount();
+    $result["depHeads"] = getDepHeads();
+
+
+    return $result;
+}
+
 
 switch($_POST['functionname']) {
+    case 'getDashboardData':
+        $result=getDashboardData();
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        break;
+    case 'getLocationNameAndIdFromDepartment':
+        $result=getLocationNameAndIdFromDepartment(($_POST['arguments'][0]));
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        break;
+    case 'updateJSON':
+        $result=updteJSON(($_POST['arguments'][0]));
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        break;
     case 'verifyLogin':
         $result=verifyLogin(($_POST['arguments'][0]),($_POST['arguments'][1]));
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
@@ -700,6 +822,14 @@ switch($_POST['functionname']) {
         break;
     case 'getJobTitles':
         $result=getJobTitles();
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        break;
+    case 'getAllDepartmentInfo':
+        $result=getAllDepartmentInfo(($_POST['arguments'][0]));
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        break;
+    case 'getLocationIDAndNameFromDepartment':
+        $result=getLocationIDAndNameFromDepartment(($_POST['arguments'][0]));
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
         break;
     }
