@@ -6,6 +6,7 @@ var scrollHeight;
 var savedHeight;
 var activeUser;
 var activeWindow;
+var userKey;
 
 //Get scroll value on scroll
 window.addEventListener("scroll", (event) => {
@@ -81,7 +82,7 @@ function fillDirectory(){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'search', arguments: [obj]},
+        data: {functionname: 'search', arguments: [obj,userKey]},
         success: (res)=>{
         i=0;
         res.forEach(function(record){
@@ -129,7 +130,7 @@ function fillLocations(){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'getLocations'},
+        data: {functionname: 'getLocations', arguments: [userKey]},
         success: (obje)=>{
             obje.forEach(function(location){
                 option = document.createElement("option") 
@@ -148,7 +149,7 @@ function fillLocations(){
             
             $('#locationSearch').selectpicker();
         },
-        error: (er)=>{console.log(er)}
+        error: (er)=>{console.log(er.responseText)}
         
     })
 }
@@ -159,7 +160,7 @@ function fillID(loc){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'getAvailableIDs'},
+        data: {functionname: 'getAvailableIDs', arguments: [userKey]},
         success: (obje)=>{
             ranNum = Math.floor(Math.random()*10)
             $(`#id${loc}`).val(obje[ranNum])
@@ -178,7 +179,7 @@ function fillDashboard(){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: `getDashboardData`},
+        data: {functionname: `getDashboardData`, arguments: [userKey]},
         success: (obj)=>{
             $("#dashboardLocationsList").empty()
             $("#dashboardDepartmentsList").empty()
@@ -224,7 +225,7 @@ function fillDepartments(){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'getDepartments'},
+        data: {functionname: 'getDepartments', arguments: [userKey]},
         success: (obje)=>{
             obje.forEach(function(department){
                 option = document.createElement("option")
@@ -314,6 +315,8 @@ function logoutClicked(){
     $("#directoryList").empty()
     $("#resultList").empty()
     $("#signInForm").collapse("show")
+    $(".dashboard-list").empty()
+    userKey = ""
 }
 
 //Checks if username and pasword have been entered 
@@ -333,17 +336,16 @@ function loginClicked(){
 
 //Verifies username and password agaimst the database
 function verifyLogin(username,password){
-    fillLocations()
-    fillDepartments()
     jQuery.ajax({
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
         data: {functionname: `verifyLogin`, arguments: [username,password]},
         success: (obj)=>{
-            if (obj ==true){
+            if (obj.result ==true){
+                userKey = obj.key    
                 loginVerified(username)
-                activeUser = username            
+                activeUser = username        
             } else {
                 loginFailed()
             }
@@ -367,6 +369,8 @@ function loginFailed(){
 //Hides sign in form / fills and shows dashboard
 function loginVerified(username){
     fillDashboard()
+    fillDepartments()
+    fillLocations()
     $("#dashboard").show()
     $("#usernameDisplay").text(username)
     $("#searchResults").hide("")
@@ -438,7 +442,7 @@ function displayPersonnel(){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: `search`, arguments: [obj]},
+        data: {functionname: `search`, arguments: [obj, userKey]},
         success: (people)=>{
             i=0;
             people.forEach((record)=>{
@@ -451,7 +455,7 @@ function displayPersonnel(){
                 </li>`
                 $("#directoryList").append(personHtml)
             })
-        }
+        }, error: (err)=>{console.log(err.responseText)}
     })
 
 }
@@ -463,7 +467,7 @@ function displayDepartmentsList(){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: `getDepartmentsAndLocations`},
+        data: {functionname: `getDepartmentsAndLocations`, arguments: [userKey]},
         success: (locandDep)=>{
             departments = locandDep[0]
             departments.forEach((department)=>{
@@ -472,7 +476,7 @@ function displayDepartmentsList(){
                 $("#directoryList").append(departmentHtml)
                 displayPersonnelList(department.id,department.name)
             })
-        }
+        }, error: (err)=>{console.log(err.responseText)}
     })
 
 }
@@ -480,12 +484,11 @@ function displayDepartmentsList(){
 //Displays entries under location headings
 function displayLocationsList(){
     obj = {firstName:"",lastName:"",email:"",id:"",department:"",location:"",jobTitle:""}
-    
     jQuery.ajax({
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: `getDepartmentsAndLocations`},
+        data: {functionname: `getDepartmentsAndLocations`, arguments: [userKey]},
         success: (locandDep)=>{
             locations = locandDep[1]
             departments = locandDep[0]
@@ -507,7 +510,7 @@ function displayLocationDepartmentsList(locations){
             type: "POST",
             url: 'php/companydir.php',
             dataType: 'json',
-            data: {functionname: `getDepartmentNamesAndIdsFromLocation`, arguments: [location.id]},
+            data: {functionname: `getDepartmentNamesAndIdsFromLocation`, arguments: [location.id,userKey]},
             success: (departments)=>{
                 for (i=0;i<departments[0].length;i++){
                     locationHtml = `<li class="list-group-item" id="${departments[1][i].replace(/[^a-zA-Z]/g, "")}" onclick="departmentDropdownOpened(this)"type="button" data-toggle="collapse" act="0" data-target="#collapse${departments[1][i].replace(/[^a-zA-Z]/g, "")}" aria-expanded="false" aria-controls="collapse${departments[1][i].replace(/[^a-zA-Z]/g, "")}">${departments[1][i]} <span class="float-right" id="${departments[1][i].replace(/[^a-zA-Z]/g, "")}Count"></span></li>
@@ -529,7 +532,7 @@ function displayPersonnelList(departmentId, departmentName){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: `search`, arguments: [obj]},
+        data: {functionname: `search`, arguments: [obj, userKey]},
         success: (people)=>{
             i=0;
             people.forEach((record)=>{
@@ -746,7 +749,7 @@ function searchLocations(obj){
                 type: "POST",
                 url: 'php/companydir.php',
                 dataType: 'json',
-                data: {functionname: 'search', arguments: [obj]},
+                data: {functionname: 'search', arguments: [obj, userKey]},
                 success: (result)=>{},
                 error:(err)=>{console.log(err.responseText)}
             })
@@ -845,7 +848,7 @@ function entryClicked(id){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'getPersonByID', arguments: [id]},
+        data: {functionname: 'getPersonByID', arguments: [id,userKey]},
         success: displayEntry,
         error: (er)=>{console.log(er.responseText)}
     })
@@ -876,7 +879,7 @@ function displayEntry(person){
     
     $("#firstNamePen").removeClass("d-none");
     $("#firstNameTick").addClass("d-none");
-    $("#firstNameTick").removeAttr("onclick");
+    $("#firstNameTickIcon").removeAttr("onclick");
     $("#firstNameTickIcon").attr("onclick",`updateSingleCol(${person.id},"firstName")`);
 
     $("#lastNameEntry").text(person.lastName)
@@ -887,8 +890,8 @@ function displayEntry(person){
     
     $("#lastNamePen").removeClass("d-none");
     $("#lastNameTick").addClass("d-none");
-    $("#lastNameTick").removeAttr("onclick");
-    $("#lastNameTick").attr("onclick",`updateSingleCol(${person.id},"lastName")`);
+    $("#lastNameTickIcon").removeAttr("onclick");
+    $("#lastNameTickIcon").attr("onclick",`updateSingleCol(${person.id},"lastName")`);
 
     $("#idEntry").text(person.id)
     $("#idShow").removeClass("d-none")
@@ -951,6 +954,7 @@ function displayEntry(person){
     $("#saveButton").attr("onclick", `saveEntry(${person.id})`)
  
 }
+
  
 function pasteFromClipboard(elem){
     navigator.clipboard.readText().then(clipText =>
@@ -967,7 +971,7 @@ function saveEntry(id){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'checkID', arguments: [person.id]},
+        data: {functionname: 'checkID', arguments: [person.id,userKey]},
         success: (obj)=>{
             if (obj == 'false' || person.id == id){
                 person.firstName = $("#firstNameInput").val()
@@ -1007,7 +1011,7 @@ function updatePerson(person,id){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'updateAll', arguments: [person,id]},
+        data: {functionname: 'updateAll', arguments: [person,id,userKey]},
         success: (obj)=>{
             reloadData();
             showAlert();
@@ -1037,7 +1041,7 @@ function addJobTitle(title){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'updateJSON', arguments: [title]},
+        data: {functionname: 'updateJSON', arguments: [title,userKey]},
         success: (obje)=>{
         }
     })
@@ -1056,7 +1060,7 @@ function deleteEntry(id){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'deleteEntry', arguments: [id]},
+        data: {functionname: 'deleteEntry', arguments: [id,userKey]},
         success: (obj)=>{
             groupByLocation()
             showAlert()
@@ -1093,7 +1097,7 @@ function updateSingleCol(id, elem){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'updateDetails', arguments: [elem,val,id]},
+        data: {functionname: 'updateDetails', arguments: [elem,val,id,userKey]},
         success: (obj)=>{
             if (obj == "invalid id"){
             showAlert()
@@ -1113,7 +1117,7 @@ function updateSingleCol(id, elem){
                         type: "POST",
                         url: 'php/companydir.php',
                         dataType: 'json',
-                        data: {functionname: 'getLocationIDAndNameFromDepartment', arguments: [val]},
+                        data: {functionname: 'getLocationIDAndNameFromDepartment', arguments: [val, userKey]},
                         success: (obj)=>{
                             $(`#departmentLocation`).text(obj.locationName)
                             $(`#departmentLocation`).removeAttr("onclick")
@@ -1214,7 +1218,7 @@ function checkID(elem){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'checkID', arguments: [id]},
+        data: {functionname: 'checkID', arguments: [id, userKey]},
         success: (obje)=>{
             if(elem.id=="idSearch"){
                 if (obje == "false"){
@@ -1285,7 +1289,7 @@ function createDepartment(){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'addDepartment', arguments:[departmentName,locationid]},
+        data: {functionname: 'addDepartment', arguments:[departmentName,locationid,userKey]},
         success: (obj)=>{
             if(obj == true){
                 showAlert()
@@ -1317,7 +1321,7 @@ function createLocation(){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'addLocation', arguments:[locationName]},
+        data: {functionname: 'addLocation', arguments:[locationName, userKey]},
         success: (obj)=>{
             if(obj == true){    
                 reloadData()
@@ -1387,7 +1391,7 @@ function submitCreate(){
         type: "POST",
         url: 'php/companydir.php',
         dataType: 'json',
-        data: {functionname: 'create', arguments: [obj]},
+        data: {functionname: 'create', arguments: [obj, userKey]},
         success: (obj)=>{
             if (obj != "ID or Email already in use"){
                 

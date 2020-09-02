@@ -32,6 +32,7 @@ html, body {
     align-items: center;
     box-shadow: var(--bs);
     padding:5px;
+    min-height: 60px;;
     
 
 }
@@ -74,7 +75,7 @@ html, body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-@media(max-width:630px){
+@media(max-width:650px){
     #navText{
         display:none;
     }
