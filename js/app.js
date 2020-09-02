@@ -16,7 +16,7 @@ window.addEventListener("scroll", (event) => {
 window.onload = function(){
     //Untick to fill in jobs
     //fillJobs()
-    
+    window.FontAwesomeConfig = { autoReplaceSvg: false }
 
 
     //Gets available window height to resize boxes
@@ -31,9 +31,9 @@ window.onload = function(){
     $("#usernameInput").focus()
 
     //Gives menu button control over sidebar
-    $("#menuButton").click(function(){
+    $(".menu-button").click(function(){
         $('.sidebar-container').toggleClass('sidebar-container-active')
-        $("#menuButton").toggleClass('menu-active')
+        $(".menu-button").toggleClass('menu-active')
     })
 
     //Hides sidebar when clicking outside nav
@@ -107,7 +107,7 @@ function fillDirectory(){
                     ${record.locationName}
                 </div>
                 <div class="col">
-                ${record.departmentName} (<i>${record.departmentHead}</i>)
+                ${record.departmentName}    
                 </div>
             </div>
             <a href="#" data-toggle="modal" data-target="#entryModal" onclick="entryClicked(${record.id})" class="stretched-link"></a>
@@ -371,9 +371,11 @@ function loginVerified(username){
     fillDashboard()
     fillDepartments()
     fillLocations()
-    $("#dashboard").show()
+    groupByLocation()
+    
     $("#usernameDisplay").text(username)
     $("#searchResults").hide("")
+    $("#directory").show()
     $(".openPageImage").addClass("openPage-animated")
     $( "#openPage" ).animate({
         opacity: 0,
@@ -704,15 +706,18 @@ function submitSearch(){
     obj.locationNames = obj.locationNames.split(",")
     obj.departmentNames = $("button[data-id='departmentSearch'] .filter-option-inner-inner").text()
     
-
+    console.log(obj.departmentNames)
     //Sanitizes data
-    if (obj.departmentNames[0] == "Leave blank to search all..." || obj.departmentArray == null){
-        obj.departmentNames[0] = ""
+    if (obj.departmentNames == "Leave blank to search all..." || obj.departmentArray == null){
+        
+        obj.departmentNames = [""]
         obj.departmentArray = []
         obj.departmentArray[0] = ""
     } else {
         obj.departmentNames = obj.departmentNames.split(",")
     }
+
+    console.log(obj)
 
     if (obj.locationNames[0] == "Leave blank to search all..." || obj.locationArray == null){
         obj.locationNames[0] = ""
@@ -725,6 +730,7 @@ function submitSearch(){
     }
 
 
+    console.log(obj)
     //Checks whether any departments/locations have been provided
     if (obj.locationArray != null){
         searchLocations(obj)

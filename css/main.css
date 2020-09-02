@@ -37,10 +37,12 @@ html, body {
 
 }
 
-#menuButton{
+.menu-button{
     height:30px;
     width:30px;
+    transform:rotate(0deg);
     transition: all 0.5s;
+
 }
 
 

@@ -10,41 +10,28 @@
 
         
         
-        <!--jQuery-->
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         
         <!--Bootstrap-->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-      
+        <link rel="stylesheet" href="css/bootstrap.min.css" >
         
         <!--FontAwesome-->
-        <link src="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-        <script src="https://kit.fontawesome.com/ef02b9276b.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="css/facss/all.css">
         
-        <!--Autocomplete-->
-        <script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.5/dist/latest/bootstrap-autocomplete.min.js"></script>
         
-        <!--MultiSelect-->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+        
+        <!--Multi Select-->
+        <link rel="stylesheet" href="css/bootstrap-select.min.css">
         
         
         <!--My Styles-->
         <link href="css/customBootstrap.css" rel="stylesheet">
         <link href="css/main.css" rel="stylesheet">
-        <script src="js/app.js"></script>
       </head>
       <body class="bg-dark">
 
 
 <div id="sidebar" class="sidebar-container">
   <ul class="sidebar-list"> 
-
-    <li class="sidebar-list-item"><a href="#" onclick="dashboardClicked()" class="sidebar-link"><h6 class="sidebar-list-text">Dashboard</h6><i class="sidebar-icon fas fa-tachometer-alt fa-2x"></i></a></li>
-    
     <li class="sidebar-list-item"><a href="#" onclick="directoryClicked()" class="sidebar-link"><h6 class="sidebar-list-text">Directory</h6><i class="sidebar-icon fas fa-address-book fa-2x"></i></a></li>
     <li class="sidebar-list-item"><a href="#" onclick="searchClicked()" class="sidebar-link"><h6 class="sidebar-list-text">Search</h6><i class="sidebar-icon fas fa-search fa-2x"></i></a></li>
     <li class="nav-item dropdown" id="createTab">
@@ -59,24 +46,10 @@
     </li>             
   </ul>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
+     
         <!--Navbar/Header-->
         <ul id="navbar" class="nav bg-primary sticky-top h-10">
-          <li class=""><button  class="btn text-light"><i id="menuButton" class="fas fa-bars fa-2x"></i></button></li>
+          <li class=""><a href="#" class=""><i id="menuButton"  class="fas fa-bars fa-2x text-light menu-button" ></i></a></li>
           
           <li class="">
             <img src="img/android-chrome-192x192.png" id="navLogo">
@@ -93,15 +66,10 @@
           </li>   
         </ul>
 
-
-
-        
         <!--Dropdown warning-->
         <div id="collapseAlert" class="collapse sticky-top text-center position-absolute w-100">
           <div><h6 id="alertText" class="rounded-bottom border-bottom border-dark p-1"></h6><a href="#" class="stretched-link" onmouseover="hideAlert()"></a></div>
         </div>
-
-
 
         <div class="" id="openPage"> 
           <!--Sign In-->
@@ -140,89 +108,10 @@
             </div>
           </div>
         </div>
-
         </div>
-
   
         <!--Main-->
     <div class="my-auto position-relative bg-dark" id="main">
-
-
-
-      <!--Dashboard-->
-
-      <div id="dashboard">
-      <div id="" class="container d-flex justify-content-around flex-row">
-        
-        <div id="locationsCard" class="card dashboard-card">
-          
-          <div class="card-body dashboard-card-body">
-            <div class="justify-content-center align-items-center d-flex flex-column">
-              <button class="btn" data-target="#dashboardLocationsCollapse" data-toggle="collapse">
-              <i class="fas fa-globe-asia fa-3x"></i>
-              <h6 class="text-center">Locations<br><span id="locationCardDisplay"></span></h6>
-              </button>
-            </div>
-          </div>
-
-          <div class="card-footer dashboard-card-footer">
-            <div class="collapse" id="dashboardLocationsCollapse">
-              <p class="text-center"><b>Locations</b></p>
-              <div id="dashboardLocationsList" class="dashboard-list">
-
-              
-            </div>
-            </div>
-        </div>
-      </div>
-
-        <div id="departmentsCard" class="card dashboard-card">
-          <div class="card-body dashboard-card-body">
-            <div class="justify-content-center align-items-center d-flex flex-column">
-              <button class="btn" data-target="#dashboardDepartmentsCollapse" data-toggle="collapse">
-                <i class="fas fa-building fa-3x"></i>
-                <h6 class="text-center">Departments<br><span id="departmentCardDisplay"></span></h6>
-              </button>
-            </div>
-            
-          </div>
-          <div class="card-footer dashboard-card-footer">
-            <div class="collapse" id="dashboardDepartmentsCollapse">
-              <p class="text-center"><b>Departments</b></p>
-              <div id="dashboardDepartmentsList" class="dashboard-list">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="personnelCard" class="card dashboard-card">
-          <div class="card-body dashboard-card-body">
-            <div class="justify-content-center align-items-center d-flex flex-column">
-              <button class="btn" data-target="#dashboardPersonnelCollapse" data-toggle="collapse">
-                <i class="fas fa-users fa-3x"></i>
-                <h6 class="text-center">Personnel<br><span id="personnelCardDisplay"></span></h6>
-              </button>
-              </div>   
-         
-          </div>
-          <div class="card-footer dashboard-card-footer">
-            <div class="collapse" id="dashboardPersonnelCollapse">
-              <p class="text-center"><b>Department Heads</b></p>
-            <div id="dashboardPersonnelList" class="dashboard-list">
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-      </div></div>
-
-
-
-
-
-
-
 
       <!--Directory-->
       <div id="directory" style="display:none" class="bg-light p-2">
@@ -233,15 +122,10 @@
             <option value="departments">Departments</option>
             <option value="none">None</option>
           </select>
-      </div>
+        </div>
         <ul id="directoryList"  class="list-group bg-light"></ul>
       </div>
       
-
-      
-
-
-        
 <!---Search Results-->
 
         <div id="searchResults" class="bg-dark" style="display: none;">
@@ -251,19 +135,7 @@
           </ul>
           
         </div>
-
-
-
-
-
-
-
-
-
-
-
-
-    </div>
+        </div>
 
 
 
@@ -273,83 +145,74 @@
 
 
 <!--Search Modal-->
-<div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="deleteModalLabel">Search</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <button  type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div id="search" class="container h-100">
-          <div id="searchFormContainer" class="h-auto">
-          <form class="" onsubmit="return false" id="searchForm"  role="form">
-              <div class="form-group row">
-                  <label for="firstName" class="col-3 my-auto text-center">First Name</label>
-                  <div class="col-9 my-auto">
-                      <input type="text" id="firstNameSearch" placeholder="First Name" class="form-control" autofocus>
-                  </div>
-              </div>
-              <div class="form-group row">
-                  <label for="lastNameSearch" class="col-3 my-auto text-center">Last Name</label>
-                  <div class="col-9">
-                      <input type="text" id="lastNameSearch" placeholder="Last Name" class="form-control" autofocus>
-                  </div>
-              </div>
-              <div class="form-group row">
-                  <label for="emailSearch" class="col-3 my-auto text-center">Email </label>
-                  <div class="col-9">
-                      <input type="email" id="emailSearch" placeholder="Email" class="form-control" name= "emailSearch">
-                  </div>
-              </div>
-              <div class="form-group row">
-                <label for="jobTitleSearch" class="col-3 my-auto text-center">Job Title</label>
-            <div class="col-9">
-                <input type="search"  id="jobTitleSearch"  placeholder="Job Title" autocomplete="off" class="form-control basicAutoComplete">
+        <div class="modal fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="deleteModalLabel">Search</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button  type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
             </div>
+            <div class="modal-body">
+              <div id="search" class="container h-100">
+                <div id="searchFormContainer" class="h-auto">
+                <form class="" onsubmit="return false" id="searchForm"  role="form">
+                    <div class="form-group row">
+                        <label for="firstName" class="col-3 my-auto text-center">First Name</label>
+                        <div class="col-9 my-auto">
+                            <input type="text" id="firstNameSearch" placeholder="First Name" class="form-control" autofocus>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="lastNameSearch" class="col-3 my-auto text-center">Last Name</label>
+                        <div class="col-9">
+                            <input type="text" id="lastNameSearch" placeholder="Last Name" class="form-control" autofocus>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="emailSearch" class="col-3 my-auto text-center">Email </label>
+                        <div class="col-9">
+                            <input type="email" id="emailSearch" placeholder="Email" class="form-control" name= "emailSearch">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="jobTitleSearch" class="col-3 my-auto text-center">Job Title</label>
+                  <div class="col-9">
+                      <input type="search"  id="jobTitleSearch"  placeholder="Job Title" autocomplete="off" class="form-control basicAutoComplete">
+                  </div>
+              </div>
+                    <div class="form-group row">
+                        <label for="idSearch" class="col-3 my-auto text-center">ID Number</label>
+                        <div class="col-9">
+                            <input type="number" min="1" step="1" oninput="checkID(this)" onblur="checkID(this)" id="idSearch" placeholder="ID Number" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="departmentSearch" class="col-3 my-auto text-center">Department</label>
+                        <div class="col-9">
+                            <select id="departmentSearch" title="Leave blank to search all..." data-actions-box="true" multiple ></select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="locationSearch" class="col-3 my-auto text-center">Location</label>
+                        <div class="col-9">
+                          <select id="locationSearch" title="Leave blank to search all..." multiple data-actions-box="true" ></select>
+                        </div>
+                    </div>
+
+                    <button type="submit" onclick="submitSearch()" class="btn btn-primary btn-block">Search</button>
+                </form> 
+              </div>
+            </div> 
+
+
+
+            </div>
+          </div>
         </div>
-              <div class="form-group row">
-                  <label for="idSearch" class="col-3 my-auto text-center">ID Number</label>
-                  <div class="col-9">
-                      <input type="number" min="1" step="1" oninput="checkID(this)" onblur="checkID(this)" id="idSearch" placeholder="ID Number" class="form-control">
-                  </div>
-              </div>
-              <div class="form-group row">
-                  <label for="departmentSearch" class="col-3 my-auto text-center">Department</label>
-                  <div class="col-9">
-                      <select id="departmentSearch" title="Leave blank to search all..." data-actions-box="true" multiple ></select>
-                  </div>
-              </div>
-              <div class="form-group row">
-                  <label for="locationSearch" class="col-3 my-auto text-center">Location</label>
-                  <div class="col-9">
-                    <select id="locationSearch" title="Leave blank to search all..." multiple data-actions-box="true" ></select>
-                  </div>
-              </div>
-
-              <button type="submit" onclick="submitSearch()" class="btn btn-primary btn-block">Search</button>
-          </form> 
         </div>
-      </div> 
-
-
-
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
 
         <!--Delete Modal-->
         <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -372,7 +235,7 @@
               </div>
             </div>
         </div>
-    </div>
+        </div>
 
 
         <!--Logout Modal-->
@@ -393,7 +256,7 @@
               </div>
             </div>
         </div>
-      </div>
+        </div>
 
 
         <!--Create Modal-->
@@ -496,7 +359,7 @@
             </div>
           </div>
         </div>
-      </div>          
+        </div>          
           
         <!--Entry Modal-->
         <div class="modal fade" id="entryModal" tabindex="-2" role="dialog" aria-labelledby="entryModalLabel" aria-hidden="true">
@@ -616,9 +479,30 @@
             </div>
           </div>
         </div>
-      </div>
+        </div>
 
 
+
+
+
+      <!--Scripts-->
+      
+        <!--jQuery-->
+        <script src="js/jquery-3.5.1.slim.min.js"></script>
+        <script src="js/jquery-3.5.1.min.js"></script>
+
+        <!--Bootstrap-->
+        <script src="js/bootstrap.bundle.js" ></script>    
+
+        <!--Autocomplete-->
+        <script src="js/bootstrap-autocomplete.min.js"></script>
+
+      
+        <!--MultiSelect-->
+        <script src="js/bootstrap-select.js"></script>
+
+        <!--My Scripts-->
+        <script src="js/app.js"></script>
 
 
       </body>

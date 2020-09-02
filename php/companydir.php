@@ -1,11 +1,5 @@
 <?php
-
-$dbName = "companydirectory";
-$dbUser = "root";
-$dbHost = "localhost";
-$dbPass = "";
-$key = 'jabberwock';
-
+include('config.php');
 //Updates details for individual column
 function updateDetails($column, $data, $id, $userKey){
     global $dbName, $dbUser, $dbHost, $dbPass, $key;
